@@ -11,15 +11,32 @@ cloudinary.config({
  * Uploads a file buffer directly to Cloudinary.
  * @param {Buffer} fileBuffer - The binary file contents.
  * @param {string} folder - Destination folder on Cloudinary.
+ * @param {string} filename - The original file name with extension.
  * @returns {Promise<string>} The secure HTTPS url of the uploaded file.
  */
-export async function uploadToCloudinary(fileBuffer, folder = 'transitops') {
+export async function uploadToCloudinary(fileBuffer, folder = 'transitops', filename = '') {
+  const extension = filename.split('.').pop()?.toLowerCase() || '';
+  
+  // Images (png, jpg, jpeg, gif, webp) should be uploaded as 'image' type
+  const isViewable = ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(extension);
+  
+  const options = {
+    folder,
+    resource_type: isViewable ? 'image' : 'raw'
+  };
+
+  if (filename) {
+    const cleanName = filename.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
+    // For raw resources (like PDF/DOCX), we must append the extension to the public_id to preserve it.
+    options.public_id = `${Date.now()}-${cleanName}${isViewable ? '' : '.' + extension}`;
+    options.use_filename = true;
+    options.unique_filename = false;
+    options.filename_override = filename;
+  }
+
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload_stream(
-      { 
-        folder, 
-        resource_type: 'auto' // Autodetects pdf, png, jpg, etc.
-      },
+      options,
       (error, result) => {
         if (error) {
           console.error('Cloudinary upload error:', error);

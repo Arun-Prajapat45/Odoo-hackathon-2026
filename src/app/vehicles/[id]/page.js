@@ -152,11 +152,8 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to upload document');
 
-      // Refresh documents
-      setVehicle(prev => ({
-        ...prev,
-        documents: [...prev.documents, data]
-      }));
+      // Reload vehicle data (syncs documents and expiry dates)
+      await fetchData();
 
       // Reset file input form
       setDocFile(null);
@@ -183,11 +180,8 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete document');
 
-      // Remove from state
-      setVehicle(prev => ({
-        ...prev,
-        documents: prev.documents.filter(d => d.id !== docId)
-      }));
+      // Reload vehicle data
+      await fetchData();
     } catch (err) {
       alert(err.message);
     }

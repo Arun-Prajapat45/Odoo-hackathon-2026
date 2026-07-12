@@ -4,12 +4,45 @@ import { deleteFromCloudinary } from '@/lib/cloudinary';
 import { unlink } from 'fs/promises';
 import path from 'path';
 
+async function syncVehicleExpiryDates(vehicleId) {
+  try {
+    // Get latest Insurance document expiry date
+    const insuranceDoc = await db.query(
+      "SELECT expiry_date FROM vehicle_document WHERE vehicle_id = ? AND document_type = 'Insurance' ORDER BY id DESC LIMIT 1",
+      [vehicleId]
+    );
+    const insuranceExpiry = insuranceDoc[0]?.expiry_date || null;
+
+    // Get latest Pollution document expiry date
+    const pollutionDoc = await db.query(
+      "SELECT expiry_date FROM vehicle_document WHERE vehicle_id = ? AND document_type = 'Pollution' ORDER BY id DESC LIMIT 1",
+      [vehicleId]
+    );
+    const pollutionExpiry = pollutionDoc[0]?.expiry_date || null;
+
+    // Update vehicle table
+    await db.query(
+      "UPDATE vehicle SET insurance_expiry = ?, pollution_expiry = ? WHERE id = ?",
+      [insuranceExpiry, pollutionExpiry, vehicleId]
+    );
+  } catch (err) {
+    console.error(`Failed to sync vehicle expiry dates for vehicle ${vehicleId}:`, err);
+  }
+}
+
 export async function PATCH(request, { params }) {
   try {
     const { docId } = await params;
     const documentId = parseInt(docId, 10);
     const body = await request.json();
     const { verified, expiryDate } = body;
+
+    // Fetch vehicle_id of document
+    const docData = await db.query("SELECT vehicle_id FROM vehicle_document WHERE id = ?", [documentId]);
+    if (docData.length === 0) {
+      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    }
+    const vehicleId = docData[0].vehicle_id;
 
     // Build conditional updates
     if (verified !== undefined && expiryDate !== undefined) {
@@ -19,6 +52,9 @@ export async function PATCH(request, { params }) {
     } else if (expiryDate !== undefined) {
       await db.query("UPDATE vehicle_document SET expiry_date = ? WHERE id = ?", [expiryDate || null, documentId]);
     }
+
+    // Sync expiry dates to vehicle table
+    await syncVehicleExpiryDates(vehicleId);
 
     const docList = await db.query(`
       SELECT 
@@ -44,24 +80,28 @@ export async function DELETE(request, { params }) {
     const { docId } = await params;
     const documentId = parseInt(docId, 10);
 
-    // Fetch document to get file path
-    const docList = await db.query("SELECT document_url AS documentUrl FROM vehicle_document WHERE id = ?", [documentId]);
+    // Fetch document to get file path and vehicle_id
+    const docList = await db.query("SELECT vehicle_id, document_url FROM vehicle_document WHERE id = ?", [documentId]);
     if (docList.length === 0) {
       return NextResponse.json({ error: 'Document not found' }, { status: 404 });
     }
 
     const document = docList[0];
+    const vehicleId = document.vehicle_id;
 
     // Delete record from DB first
     await db.query("DELETE FROM vehicle_document WHERE id = ?", [documentId]);
 
+    // Sync expiry dates to vehicle table
+    await syncVehicleExpiryDates(vehicleId);
+
     // Attempt to delete file from Cloudinary (or fallback to local disk)
     try {
-      if (document.documentUrl) {
-        if (document.documentUrl.includes('cloudinary.com') || document.documentUrl.startsWith('http')) {
-          await deleteFromCloudinary(document.documentUrl);
-        } else if (document.documentUrl.startsWith('/uploads/')) {
-          const filePath = path.join(process.cwd(), 'public', document.documentUrl);
+      if (document.document_url) {
+        if (document.document_url.includes('cloudinary.com') || document.document_url.startsWith('http')) {
+          await deleteFromCloudinary(document.document_url);
+        } else if (document.document_url.startsWith('/uploads/')) {
+          const filePath = path.join(process.cwd(), 'public', document.document_url);
           await unlink(filePath);
         }
       }

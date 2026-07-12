@@ -46,9 +46,9 @@ export default function DriversPage() {
   });
 
   const stats = {
-    total:     drivers.length,
+    total: drivers.length,
     available: drivers.filter((d) => d.status === 'AVAILABLE').length,
-    on_trip:   drivers.filter((d) => d.status === 'ON_TRIP').length,
+    on_trip: drivers.filter((d) => d.status === 'ON_TRIP').length,
     suspended: drivers.filter((d) => d.status === 'SUSPENDED').length,
   };
 
@@ -100,10 +100,10 @@ export default function DriversPage() {
       {/* Stats */}
       <div className="stats-grid">
         {[
-          { label: 'Total Drivers', value: stats.total,     icon: '🧑‍✈️', color: 'var(--accent)' },
-          { label: 'Available',     value: stats.available, icon: '✅', color: 'var(--green)' },
-          { label: 'On Trip',       value: stats.on_trip,   icon: '🛣️', color: 'var(--accent-light)' },
-          { label: 'Suspended',     value: stats.suspended, icon: '🚫', color: 'var(--red)' },
+          { label: 'Total Drivers', value: stats.total, icon: '🧑‍✈️', color: 'var(--accent)' },
+          { label: 'Available', value: stats.available, icon: '✅', color: 'var(--green)' },
+          { label: 'On Trip', value: stats.on_trip, icon: '🛣️', color: 'var(--accent-light)' },
+          { label: 'Suspended', value: stats.suspended, icon: '🚫', color: 'var(--red)' },
         ].map((s) => (
           <div className="stat-card" key={s.label}>
             <div className="stat-icon" style={{ background: `color-mix(in srgb, ${s.color} 15%, transparent)` }}>
@@ -143,7 +143,7 @@ export default function DriversPage() {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="">All Statuses</option>
-            {['AVAILABLE','ON_TRIP','OFF_DUTY','SUSPENDED'].map((s) => (
+            {['AVAILABLE', 'ON_TRIP', 'OFF_DUTY', 'SUSPENDED'].map((s) => (
               <option key={s} value={s}>{s.replace('_', ' ')}</option>
             ))}
           </select>
@@ -166,14 +166,13 @@ export default function DriversPage() {
             <table>
               <thead>
                 <tr>
-                  <th>Driver</th>
-                  <th>Employee Code</th>
-                  <th>License</th>
-                  <th>Type</th>
-                  <th>Expiry</th>
-                  <th>Safety Score</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th>ID</th>
+                  <th>DRIVER</th>
+                  <th>LICENSE #</th>
+                  <th>EXPIRY</th>
+                  <th>SAFETY SCORE</th>
+                  <th>REGION</th>
+                  <th>STATUS</th>
                 </tr>
               </thead>
               <tbody>
@@ -181,49 +180,39 @@ export default function DriversPage() {
                   const days = daysUntilExpiry(d.license_expiry);
                   return (
                     <tr key={d.id}>
+                      <td className="text-orange">
+                        D-{(d.id || '').toString().padStart(3, '0')}
+                      </td>
                       <td>
                         <div className="td-primary">{d.name}</div>
-                        <div className="text-muted">{d.email}</div>
                       </td>
-                      <td className="font-mono">{d.employee_code}</td>
-                      <td className="font-mono">{d.license_number}</td>
-                      <td><span className="badge badge-info">{d.license_type}</span></td>
+                      <td className="text-mono">{d.license_number}</td>
                       <td>
-                        <span style={{ color: days <= 7 ? 'var(--red)' : days <= 30 ? 'var(--yellow)' : 'inherit' }}>
-                          {d.license_expiry}
-                          {days <= 30 && <span style={{ marginLeft: 4, fontSize: '0.7rem' }}>({days}d)</span>}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                          <span className="text-mono">{d.license_expiry}</span>
+                          <span className={`badge ${days <= 30 ? 'badge-expired' : 'badge-valid'}`}>
+                            {days <= 30 ? '⊗ EXPIRED' : '✓ VALID'}
+                          </span>
+                        </div>
                       </td>
                       <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <div
-                            style={{
-                              width: 36, height: 4, borderRadius: 2,
-                              background: 'var(--border)',
-                              position: 'relative', overflow: 'hidden'
-                            }}
-                          >
-                            <div style={{
-                              position: 'absolute', top: 0, left: 0,
-                              height: '100%',
-                              width: `${d.safety_score}%`,
-                              background: d.safety_score >= 90 ? 'var(--green)' : d.safety_score >= 70 ? 'var(--yellow)' : 'var(--red)',
-                              borderRadius: 2,
-                            }} />
+                        <div className="safety-bar-wrap">
+                          <div className="safety-bar">
+                            <div
+                              className="safety-bar-fill"
+                              style={{
+                                width: `${d.safety_score}%`,
+                                background: d.safety_score >= 90 ? 'var(--go-green)' : d.safety_score >= 70 ? 'var(--caution-amber)' : 'var(--stop-red)'
+                              }}
+                            />
                           </div>
-                          <span className="text-muted">{d.safety_score}</span>
+                          <span className="safety-score" style={{ color: d.safety_score >= 90 ? 'var(--go-green)' : d.safety_score >= 70 ? 'var(--caution-amber)' : 'var(--stop-red)' }}>
+                            {d.safety_score}
+                          </span>
                         </div>
                       </td>
+                      <td>Nairobi</td>
                       <td><StatusBadge value={d.status} /></td>
-                      <td>
-                        <div style={{ display: 'flex', gap: 6 }}>
-                          <Link href={`/drivers/${d.id}`} className="btn btn-ghost btn-sm">View</Link>
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleDelete(d.id, d.name)}
-                          >Delete</button>
-                        </div>
-                      </td>
                     </tr>
                   );
                 })}

@@ -7,7 +7,7 @@ export default function AppShell({ children, title }) {
   const pathname = usePathname();
 
   const NAV = [
-    { href: '/drivers',     icon: '🧑‍✈️', label: 'Drivers' },
+    { href: '/drivers', icon: '🧑‍✈️', label: 'Drivers' },
     { href: '/maintenance', icon: '🔧', label: 'Maintenance' },
   ];
 

@@ -1,6 +1,7 @@
 export default function StatusBadge({ value, type = 'driver' }) {
   if (!value) return null;
   const v = value.toUpperCase().replace(/_/g, '-');
+  const displayVal = value.replace(/_/g, ' ');
 
   const map = {
     // Driver statuses
@@ -29,6 +30,11 @@ export default function StatusBadge({ value, type = 'driver' }) {
     'HIGH':      'badge-high',
   };
 
+  let icon = '';
+  if (['AVAILABLE', 'ON-TRIP'].includes(v)) icon = '✓ ';
+  else if (['SUSPENDED', 'CANCELLED', 'CRITICAL'].includes(v)) icon = '⊗ ';
+  else if (['OFF-DUTY', 'RETIRED'].includes(v)) icon = '- ';
+
   const cls = map[v] || 'badge-off-duty';
-  return <span className={`badge ${cls}`}>{value.replace(/_/g, ' ')}</span>;
+  return <span className={`badge ${cls}`}>{icon}{displayVal}</span>;
 }

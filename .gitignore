@@ -44,3 +44,8 @@ next-env.d.ts
 venv/
 __pycache__/
 *.pyc
+
+# sqlite databases
+*.db
+*.db-shm
+*.db-wal

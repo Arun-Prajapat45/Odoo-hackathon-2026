@@ -52,12 +52,14 @@ export async function PUT(request, { params }) {
       WHERE id = ?
     `, [maintenance_type, description, priority, cost, status, scheduled_date, completed_date, id]);
 
-    // Business Rule: Closing maintenance → vehicle becomes AVAILABLE
+    // Business Rule: Closing maintenance → vehicle becomes AVAILABLE (unless retired)
     if (status === 'CLOSED' && existing.status === 'ACTIVE') {
-      await queryDb(`UPDATE vehicle SET status = 'AVAILABLE' WHERE id = ?`, [existing.vehicle_id]);
-
-      // Notify fleet managers that vehicle is back
-      await notifyVehicleAvailable(existing.vehicle_id, maintenance_type);
+      const v = (await queryDb(`SELECT status FROM vehicle WHERE id = ?`, [existing.vehicle_id]))?.[0];
+      if (v && v.status !== 'RETIRED') {
+        await queryDb(`UPDATE vehicle SET status = 'AVAILABLE' WHERE id = ?`, [existing.vehicle_id]);
+        // Notify fleet managers that vehicle is back
+        await notifyVehicleAvailable(existing.vehicle_id, maintenance_type);
+      }
     }
 
     const updated = (await queryDb(`

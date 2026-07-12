@@ -21,28 +21,30 @@ export async function proxy(request) {
     }
   }
 
-  if (pathname.startsWith('/dashboard')) {
-    if (!userPayload) {
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
+  const publicPaths = ['/login', '/register', '/api/auth/login', '/api/auth/register'];
+  const isPublic = publicPaths.includes(pathname);
+
+  if (!userPayload && !isPublic && !pathname.startsWith('/_next') && !pathname.startsWith('/favicon.ico') && !pathname.startsWith('/api/ai')) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (userPayload && isPublic) {
+    if (pathname === '/login' || pathname === '/register') {
+      return NextResponse.redirect(new URL('/', request.url));
     }
-    const response = NextResponse.next();
+  }
+
+  const response = NextResponse.next();
+  if (userPayload) {
     response.headers.set('x-user-id', String(userPayload.userId));
     response.headers.set('x-user-email', String(userPayload.email));
     response.headers.set('x-user-role', String(userPayload.roleName || 'Driver'));
-    return response;
   }
-
-  if (pathname === '/login' || pathname === '/register') {
-    if (userPayload) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-  }
-
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/register']
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };

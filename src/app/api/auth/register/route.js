@@ -29,8 +29,9 @@ export async function POST(request) {
     // 1. Zod schema validation
     const validation = registerSchema.safeParse(body);
     if (!validation.success) {
-      const firstError = validation.error.errors[0]?.message || 'Invalid registration payload';
-      return NextResponse.json({ error: firstError, details: validation.error.errors }, { status: 400 });
+      const issues = validation.error?.issues || validation.error?.errors || [];
+      const firstError = issues[0]?.message || 'Invalid registration payload';
+      return NextResponse.json({ error: firstError, details: issues }, { status: 400 });
     }
 
     const { name, email, password, role_id } = validation.data;

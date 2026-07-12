@@ -47,73 +47,73 @@ export default function DashboardOverview() {
   }, []);
 
   if (loading) {
-    return <div className="loading-center"><div className="spinner" /> Loading dashboard...</div>;
+    return <div className="flex h-full items-center justify-center text-slate-500"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 dark:border-white mr-3" /> Loading dashboard...</div>;
   }
 
   if (!stats) {
     return (
-      <div className="empty-state">
-        <AlertTriangle size={32} />
-        <div className="empty-state-title">Could not load dashboard data</div>
-        <div className="empty-state-text">Check your connection and refresh the page.</div>
+      <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+        <AlertTriangle size={32} className="text-amber-500 mb-4" />
+        <div className="text-lg font-semibold text-slate-900 dark:text-white">Could not load dashboard data</div>
+        <div className="text-sm mt-1">Check your connection and refresh the page.</div>
       </div>
     );
   }
 
   return (
     <div>
-      <div className="page-header">
-        <h1 className="page-title">Overview</h1>
-        <p className="page-subtitle">System status and user activity</p>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Overview</h1>
+        <p className="text-slate-500 mt-1">System status and user activity</p>
       </div>
 
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-label"><Users size={14} /> Total Users</div>
-          <div className="stat-value">{stats.totalUsers}</div>
-          <div className="stat-change positive">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
+          <div className="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2 mb-2"><Users size={14} /> Total Users</div>
+          <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{stats.totalUsers}</div>
+          <div className="text-sm flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
             <TrendingUp size={12} /> {stats.activeUsers} active
           </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-label"><Truck size={14} /> Drivers</div>
-          <div className="stat-value">{stats.roles.Driver}</div>
-          <div className="stat-change" style={{ color: 'var(--text-2)' }}>
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
+          <div className="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2 mb-2"><Truck size={14} /> Drivers</div>
+          <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{stats.roles.Driver}</div>
+          <div className="text-sm text-slate-500 dark:text-slate-400">
             of {stats.totalUsers} total users
           </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-label"><Bell size={14} /> Notifications</div>
-          <div className="stat-value">{stats.totalNotifs}</div>
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
+          <div className="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2 mb-2"><Bell size={14} /> Notifications</div>
+          <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{stats.totalNotifs}</div>
           {stats.unreadNotifs > 0 && (
-            <div className="stat-change negative">
+            <div className="text-sm flex items-center gap-1 text-red-600 dark:text-red-400">
               {stats.unreadNotifs} unread
             </div>
           )}
         </div>
 
-        <div className="stat-card">
-          <div className="stat-label"><AlertTriangle size={14} /> Issues</div>
-          <div className="stat-value">{stats.suspendedUsers + stats.criticalNotifs}</div>
-          <div className="stat-change" style={{ color: 'var(--text-2)' }}>
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
+          <div className="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2 mb-2"><AlertTriangle size={14} /> Issues</div>
+          <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{stats.suspendedUsers + stats.criticalNotifs}</div>
+          <div className="text-sm text-slate-500 dark:text-slate-400">
             {stats.suspendedUsers} suspended · {stats.criticalNotifs} critical
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Role Breakdown */}
-        <div className="card">
-          <div className="card-header">
-            <span className="card-title">Users by Role</span>
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+            <h3 className="font-semibold text-slate-900 dark:text-white">Users by Role</h3>
           </div>
-          <div className="card-body">
+          <div className="p-5">
             {Object.entries(stats.roles).map(([role, count]) => (
-              <div key={role} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
-                <span style={{ fontSize: 13, color: 'var(--text-0)' }}>{role}</span>
-                <span className={`badge ${role === 'Admin' ? 'badge-red' : role === 'Fleet Manager' ? 'badge-blue' : role === 'Driver' ? 'badge-green' : role === 'Safety Officer' ? 'badge-purple' : 'badge-amber'}`}>
+              <div key={role} className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-700/50 last:border-0 last:pb-0">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{role}</span>
+                <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300">
                   {count}
                 </span>
               </div>
@@ -122,21 +122,23 @@ export default function DashboardOverview() {
         </div>
 
         {/* Recent Users */}
-        <div className="card">
-          <div className="card-header">
-            <span className="card-title">Recent Users</span>
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+            <h3 className="font-semibold text-slate-900 dark:text-white">Recent Users</h3>
           </div>
-          <div style={{ padding: 0 }}>
+          <div>
             {stats.recentUsers.map(u => (
-              <div key={u.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid var(--border)' }}>
-                <div className="user-cell">
-                  <div className="user-avatar">{u.name.charAt(0).toUpperCase()}</div>
+              <div key={u.id} className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-700/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
+                    {u.name.charAt(0).toUpperCase()}
+                  </div>
                   <div>
-                    <div className="user-name">{u.name}</div>
-                    <div className="user-email">{u.email}</div>
+                    <div className="text-sm font-medium text-slate-900 dark:text-white">{u.name}</div>
+                    <div className="text-xs text-slate-500">{u.email}</div>
                   </div>
                 </div>
-                <span className={`badge ${u.status === 'ACTIVE' ? 'badge-green' : u.status === 'SUSPENDED' ? 'badge-red' : 'badge-gray'}`}>
+                <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${u.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' : u.status === 'SUSPENDED' ? 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400' : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'}`}>
                   {u.status}
                 </span>
               </div>

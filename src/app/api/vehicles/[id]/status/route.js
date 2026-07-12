@@ -15,12 +15,9 @@ export async function PATCH(request, { params }) {
       }, { status: 400 });
     }
 
-    const vehicle = await db.vehicle.update({
-      where: { id: vehicleId },
-      data: { status }
-    });
+    await queryDb('UPDATE vehicle SET status = ? WHERE id = ?', [status, vehicleId]);
 
-    return NextResponse.json(vehicle);
+    return NextResponse.json({ success: true, status });
   } catch (error) {
     console.error('PATCH /api/vehicles/[id]/status error:', error);
     return NextResponse.json({ error: 'Failed to update vehicle status' }, { status: 500 });

@@ -11,20 +11,25 @@ export async function PATCH(request, { params }) {
     const body = await request.json();
     const { verified, expiryDate } = body;
 
-    const data = {};
+    let sql = 'UPDATE vehicle_document SET ';
+    const params = [];
     if (verified !== undefined) {
-      data.verified = Boolean(verified);
+      sql += 'verified = ?, ';
+      params.push(verified ? 1 : 0);
     }
     if (expiryDate !== undefined) {
-      data.expiryDate = expiryDate || null;
+      sql += 'expiry_date = ?, ';
+      params.push(expiryDate || null);
+    }
+    
+    if (params.length > 0) {
+      sql = sql.slice(0, -2);
+      sql += ' WHERE id = ?';
+      params.push(documentId);
+      await queryDb(sql, params);
     }
 
-    const document = await db.vehicleDocument.update({
-      where: { id: documentId },
-      data
-    });
-
-    return NextResponse.json(document);
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('PATCH /api/vehicles/documents/[docId] error:', error);
     return NextResponse.json({ error: 'Failed to update document' }, { status: 500 });
@@ -37,26 +42,23 @@ export async function DELETE(request, { params }) {
     const documentId = parseInt(docId, 10);
 
     // Fetch document to get file path
-    const document = await db.vehicleDocument.findUnique({
-      where: { id: documentId }
-    });
+    const docs = await queryDb('SELECT document_url FROM vehicle_document WHERE id = ?', [documentId]);
 
-    if (!document) {
+    if (!docs || docs.length === 0) {
       return NextResponse.json({ error: 'Document not found' }, { status: 404 });
     }
+    const document = docs[0];
 
     // Delete record from DB first
-    await db.vehicleDocument.delete({
-      where: { id: documentId }
-    });
+    await queryDb('DELETE FROM vehicle_document WHERE id = ?', [documentId]);
 
     // Attempt to delete file from Cloudinary (or fallback to local disk)
     try {
-      if (document.documentUrl) {
-        if (document.documentUrl.includes('cloudinary.com') || document.documentUrl.startsWith('http')) {
-          await deleteFromCloudinary(document.documentUrl);
-        } else if (document.documentUrl.startsWith('/uploads/')) {
-          const filePath = path.join(process.cwd(), 'public', document.documentUrl);
+      if (document.document_url) {
+        if (document.document_url.includes('cloudinary.com') || document.document_url.startsWith('http')) {
+          await deleteFromCloudinary(document.document_url);
+        } else if (document.document_url.startsWith('/uploads/')) {
+          const filePath = path.join(process.cwd(), 'public', document.document_url);
           await unlink(filePath);
         }
       }

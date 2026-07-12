@@ -1,7 +1,7 @@
 'use client';
 
 import { Menu, User } from 'lucide-react';
-import ThemeToggle from './ThemeSelector';
+import ThemeToggle from './ThemeToggle';
 
 const ROLE_BADGE = {
   Admin: 'badge-red',

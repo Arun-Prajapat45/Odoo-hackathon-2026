@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 import { queryDb } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
@@ -23,14 +23,25 @@ export async function createTrip(formData) {
 }
 
 export async function dispatchTrip(tripId, vehicleId, driverId, cargoWeight) {
-  // Check vehicle capacity
-  const vRes = await queryDb("SELECT capacity FROM vehicle WHERE id = ?", [vehicleId]);
-  const capacity = vRes?.data?.[0]?.capacity;
-  if (capacity && cargoWeight > capacity) {
-    throw new Error(`Cargo weight (${cargoWeight}) exceeds vehicle capacity (${capacity})`);
+  // 1. Check Vehicle
+  const vRes = await queryDb("SELECT status, capacity FROM vehicle WHERE id = ?", [vehicleId]);
+  const vehicle = vRes[0];
+  if (!vehicle) throw new Error("Vehicle not found.");
+  if (vehicle.status !== 'AVAILABLE') throw new Error(`Cannot dispatch: Vehicle is ${vehicle.status}.`);
+  if (cargoWeight > vehicle.capacity) throw new Error(`Cargo weight (${cargoWeight}kg) exceeds vehicle capacity (${vehicle.capacity}kg).`);
+
+  // 2. Check Driver
+  const dRes = await queryDb("SELECT status, license_expiry FROM driver WHERE id = ?", [driverId]);
+  const driver = dRes[0];
+  if (!driver) throw new Error("Driver not found.");
+  if (driver.status === 'SUSPENDED') throw new Error("Cannot dispatch: Driver is SUSPENDED.");
+  if (driver.status === 'ON_TRIP') throw new Error("Cannot dispatch: Driver is already ON_TRIP.");
+  
+  if (new Date(driver.license_expiry) < new Date()) {
+    throw new Error("Cannot dispatch: Driver license is EXPIRED.");
   }
 
-  // Update trip, vehicle, driver
+  // 3. Update trip, vehicle, driver
   await queryDb("UPDATE trip SET status = 'DISPATCHED', actual_start = CURRENT_TIMESTAMP WHERE id = ?", [tripId]);
   await queryDb("UPDATE vehicle SET status = 'ON_TRIP' WHERE id = ?", [vehicleId]);
   await queryDb("UPDATE driver SET status = 'ON_TRIP' WHERE id = ?", [driverId]);

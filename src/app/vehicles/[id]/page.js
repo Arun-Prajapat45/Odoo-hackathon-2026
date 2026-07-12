@@ -3,9 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Edit2, Trash2, ShieldCheck, ShieldAlert, FileText, Download, Check, X, AlertTriangle, Plus } from 'lucide-react';
-import styles from './details.module.css';
-import listStyles from '../vehicles.module.css';
+import { ChevronLeft, Edit2, Trash2, ShieldCheck, ShieldAlert, Download, X, AlertTriangle, Plus, MapPin } from 'lucide-react';
 
 export default function VehicleDetailsPage({ params: paramsPromise }) {
   const router = useRouter();
@@ -238,18 +236,21 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
 
   if (loading) {
     return (
-      <div style={{ padding: '4rem', textAlign: 'center', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)' }}>
-        <p style={{ color: 'var(--text-secondary)' }}>Loading vehicle records...</p>
+      <div className="flex items-center justify-center p-12 h-64 bg-slate-900 rounded-xl border border-slate-800/60">
+        <div className="flex items-center gap-3 text-slate-500">
+          <div className="w-5 h-5 border-2 border-slate-600 border-t-blue-500 rounded-full animate-spin" />
+          Loading vehicle records...
+        </div>
       </div>
     );
   }
 
   if (error || !vehicle) {
     return (
-      <div style={{ padding: '4rem', textAlign: 'center', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)' }}>
-        <h2 style={{ color: 'var(--danger)', marginBottom: '1rem' }}>Error Loading Page</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{error || 'Vehicle not found.'}</p>
-        <Link href="/vehicles" className="button button-secondary">
+      <div className="p-12 text-center bg-slate-900 border border-slate-800/60 rounded-xl">
+        <h2 className="text-xl font-bold text-red-400 mb-2">Error Loading Page</h2>
+        <p className="text-slate-400 mb-6">{error || 'Vehicle not found.'}</p>
+        <Link href="/vehicles" className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition-colors border border-slate-700">
           <ChevronLeft size={16} /> Back to Registry
         </Link>
       </div>
@@ -260,107 +261,129 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
   const activeTrips = vehicle.trips?.filter(t => ['DRAFT', 'DISPATCHED'].includes(t.status)) || [];
   const hasActiveTrip = activeTrips.length > 0;
 
+  const getStatusBadge = (status) => {
+    const styles = {
+      AVAILABLE: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
+      ON_TRIP: 'bg-blue-500/15 text-blue-400 border-blue-500/20',
+      IN_SHOP: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
+      RETIRED: 'bg-slate-500/15 text-slate-400 border-slate-500/20',
+    };
+    const labels = { AVAILABLE: 'Available', ON_TRIP: 'On Trip', IN_SHOP: 'In Shop', RETIRED: 'Retired' };
+    return <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${styles[status] || 'bg-slate-500/15 text-slate-400 border-slate-500/20'}`}>{labels[status] || status}</span>;
+  };
+
+  const getTripStatusStyle = (status) => {
+    const map = {
+      DRAFT: 'bg-slate-500/15 text-slate-400 border-slate-500/20',
+      DISPATCHED: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/20',
+      COMPLETED: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
+      CANCELLED: 'bg-red-500/15 text-red-400 border-red-500/20',
+    };
+    return map[status] || map.DRAFT;
+  };
+
+  const inputClass = "w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all";
+  const labelClass = "block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider";
+
   return (
-    <div className={styles.container}>
+    <div className="space-y-6">
       {/* Back Link */}
       <div>
-        <Link href="/vehicles" className={styles['back-link']}>
+        <Link href="/vehicles" className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors">
           <ChevronLeft size={16} /> Back to Vehicles
         </Link>
       </div>
 
       {/* Main Details Panel */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="flex justify-between items-start flex-wrap gap-4">
         <div>
-          <h1 style={{ fontSize: '1.875rem', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
             {vehicle.vehicleName}
-            <span className={`badge badge-${vehicle.status.toLowerCase()}`}>
-              {vehicle.status.replace('_', ' ')}
-            </span>
+            {getStatusBadge(vehicle.status)}
           </h1>
-          <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', fontFamily: 'monospace', fontWeight: '500' }}>
+          <p className="text-slate-400 mt-1 font-mono font-medium">
             REG: {vehicle.registrationNumber}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div className="flex gap-3">
           <button 
             onClick={() => setIsEditModalOpen(true)} 
-            className="button button-secondary"
+            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors border border-slate-700"
           >
-            <Edit2 size={14} /> Edit Details
+            <Edit2 size={16} /> Edit Details
           </button>
           <button 
             onClick={handleDeleteVehicle} 
-            className="button button-danger"
+            className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors border border-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={hasActiveTrip}
             title={hasActiveTrip ? "Cannot delete vehicle with active trips" : "Delete vehicle"}
           >
-            <Trash2 size={14} /> Delete Vehicle
+            <Trash2 size={16} /> Delete Vehicle
           </button>
         </div>
       </div>
 
       {/* Active Trip Blocking Notice */}
       {hasActiveTrip && (
-        <div className={styles['active-warning-banner']}>
-          <AlertTriangle size={18} />
+        <div className="p-4 rounded-xl flex items-start gap-3 bg-amber-500/10 border border-amber-500/20 text-amber-400">
+          <AlertTriangle className="mt-0.5 shrink-0" size={18} />
           <span>This vehicle is locked and cannot be deleted because it is assigned to an active trip ({activeTrips[0].tripNumber} - {activeTrips[0].status}).</span>
         </div>
       )}
 
       {/* Details Grid layout */}
-      <div className={styles['layout-grid']}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Side details */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className="lg:col-span-2 space-y-6">
           {/* Metadata Card */}
-          <div className="card">
-            <h2 className={styles['section-title']}>Vehicle Telemetry & Specifications</h2>
-            <div className={styles['info-grid']}>
-              <div className={styles['info-item']}>
-                <span className={styles['info-label']}>Category</span>
-                <span className={styles['info-value']}>{vehicle.category?.name || 'N/A'}</span>
+          <div className="bg-slate-900 rounded-xl border border-slate-800/60 p-6 shadow-sm">
+            <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-5">Vehicle Telemetry & Specifications</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-4">
+              <div>
+                <span className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Category</span>
+                <span className="text-sm font-medium text-white">{vehicle.category?.name || 'N/A'}</span>
               </div>
-              <div className={styles['info-item']}>
-                <span className={styles['info-label']}>Load Capacity</span>
-                <span className={styles['info-value']}>{vehicle.capacity?.toLocaleString()} kg</span>
+              <div>
+                <span className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Load Capacity</span>
+                <span className="text-sm font-medium text-white">{vehicle.capacity?.toLocaleString()} kg</span>
               </div>
-              <div className={styles['info-item']}>
-                <span className={styles['info-label']}>Odometer Reading</span>
-                <span className={styles['info-value']}>{vehicle.odometer?.toLocaleString()} km</span>
+              <div>
+                <span className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Odometer Reading</span>
+                <span className="text-sm font-medium text-white">{vehicle.odometer?.toLocaleString()} km</span>
               </div>
-              <div className={styles['info-item']}>
-                <span className={styles['info-label']}>Fuel Type</span>
-                <span className={styles['info-value']}>{vehicle.fuelType}</span>
+              <div>
+                <span className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Fuel Type</span>
+                <span className="text-sm font-medium text-white">{vehicle.fuelType}</span>
               </div>
-              <div className={styles['info-item']}>
-                <span className={styles['info-label']}>Manufacturer</span>
-                <span className={styles['info-value']}>{vehicle.manufacturer || 'N/A'}</span>
+              <div>
+                <span className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Manufacturer</span>
+                <span className="text-sm font-medium text-white">{vehicle.manufacturer || 'N/A'}</span>
               </div>
-              <div className={styles['info-item']}>
-                <span className={styles['info-label']}>Model</span>
-                <span className={styles['info-value']}>{vehicle.model || 'N/A'}</span>
+              <div>
+                <span className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Model</span>
+                <span className="text-sm font-medium text-white">{vehicle.model || 'N/A'}</span>
               </div>
-              <div className={styles['info-item']}>
-                <span className={styles['info-label']}>Year</span>
-                <span className={styles['info-value']}>{vehicle.year || 'N/A'}</span>
+              <div>
+                <span className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Year</span>
+                <span className="text-sm font-medium text-white">{vehicle.year || 'N/A'}</span>
               </div>
-              <div className={styles['info-item']}>
-                <span className={styles['info-label']}>Acquisition Cost</span>
-                <span className={styles['info-value']}>{vehicle.purchaseCost ? `₹${vehicle.purchaseCost.toLocaleString()}` : 'N/A'}</span>
+              <div>
+                <span className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Acquisition Cost</span>
+                <span className="text-sm font-medium text-white">{vehicle.purchaseCost ? `₹${vehicle.purchaseCost.toLocaleString()}` : 'N/A'}</span>
               </div>
-              <div className={styles['info-item']}>
-                <span className={styles['info-label']}>Current Location</span>
-                <span className={styles['info-value']}>{vehicle.currentLocation || 'Depot'}</span>
+              <div>
+                <span className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Current Location</span>
+                <span className="text-sm font-medium text-white">{vehicle.currentLocation || 'Depot'}</span>
               </div>
-              <div className={styles['info-item']}>
-                <span className={styles['info-label']}>Insurance Expiry</span>
-                <span className={styles['info-value']} style={{ color: vehicle.insuranceExpiry && new Date(vehicle.insuranceExpiry) < new Date() ? 'var(--danger)' : 'inherit' }}>
+              <div>
+                <span className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Insurance Expiry</span>
+                <span className={`text-sm font-medium ${vehicle.insuranceExpiry && new Date(vehicle.insuranceExpiry) < new Date() ? 'text-red-400 font-bold' : 'text-white'}`}>
                   {vehicle.insuranceExpiry || 'N/A'} {vehicle.insuranceExpiry && new Date(vehicle.insuranceExpiry) < new Date() ? '(Expired)' : ''}
                 </span>
               </div>
-              <div className={styles['info-item']}>
-                <span className={styles['info-label']}>Pollution Expiry</span>
-                <span className={styles['info-value']} style={{ color: vehicle.pollutionExpiry && new Date(vehicle.pollutionExpiry) < new Date() ? 'var(--danger)' : 'inherit' }}>
+              <div>
+                <span className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Pollution Expiry</span>
+                <span className={`text-sm font-medium ${vehicle.pollutionExpiry && new Date(vehicle.pollutionExpiry) < new Date() ? 'text-red-400 font-bold' : 'text-white'}`}>
                   {vehicle.pollutionExpiry || 'N/A'} {vehicle.pollutionExpiry && new Date(vehicle.pollutionExpiry) < new Date() ? '(Expired)' : ''}
                 </span>
               </div>
@@ -368,41 +391,58 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
           </div>
 
           {/* Quick Status Control Switcher */}
-          <div className="card">
-            <h2 className={styles['section-title']}>Set Vehicle Status (Manual override)</h2>
-            <div className={styles['status-widget']}>
-              {['AVAILABLE', 'ON_TRIP', 'IN_SHOP', 'RETIRED'].map((st) => (
-                <button
-                  key={st}
-                  onClick={() => handleStatusChange(st)}
-                  className={`${styles['status-btn']} ${vehicle.status === st ? styles[`status-btn-active-${st}`] : ''}`}
-                >
-                  {st.replace('_', ' ')}
-                </button>
-              ))}
+          <div className="bg-slate-900 rounded-xl border border-slate-800/60 p-6 shadow-sm">
+            <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Set Vehicle Status (Manual override)</h2>
+            <div className="flex flex-wrap gap-3">
+              {['AVAILABLE', 'ON_TRIP', 'IN_SHOP', 'RETIRED'].map((st) => {
+                const isActive = vehicle.status === st;
+                let activeClass = '';
+                if (isActive) {
+                  switch(st) {
+                    case 'AVAILABLE': activeClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'; break;
+                    case 'ON_TRIP': activeClass = 'bg-blue-500/20 text-blue-400 border-blue-500/30'; break;
+                    case 'IN_SHOP': activeClass = 'bg-amber-500/20 text-amber-400 border-amber-500/30'; break;
+                    case 'RETIRED': activeClass = 'bg-red-500/20 text-red-400 border-red-500/30'; break;
+                  }
+                } else {
+                  activeClass = 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-white';
+                }
+                
+                return (
+                  <button
+                    key={st}
+                    onClick={() => handleStatusChange(st)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${activeClass}`}
+                  >
+                    {st.replace('_', ' ')}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* Trip History Log */}
-          <div className="card">
-            <h2 className={styles['section-title']}>Assigned Trip Telemetry History</h2>
+          <div className="bg-slate-900 rounded-xl border border-slate-800/60 p-0 overflow-hidden shadow-sm">
+            <div className="p-4 border-b border-slate-800/60">
+              <h2 className="text-sm font-semibold text-white uppercase tracking-wider">Assigned Trip Telemetry History</h2>
+            </div>
             {(!vehicle.trips || vehicle.trips.length === 0) ? (
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textAlign: 'center', padding: '1rem' }}>No trips registered for this vehicle.</p>
+              <p className="p-8 text-sm text-slate-500 text-center">No trips registered for this vehicle.</p>
             ) : (
-              <div className={styles['trip-list']}>
+              <div className="divide-y divide-slate-800/60">
                 {vehicle.trips.map((trip) => (
-                  <div key={trip.id} className={styles['trip-card']}>
-                    <div className={styles['trip-info']}>
-                      <span className={styles['trip-number']}>{trip.tripNumber}</span>
-                      <span className={styles['trip-routes']}>
-                        {trip.source} → {trip.destination}
-                      </span>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  <div key={trip.id} className="p-4 hover:bg-white/[0.02] transition-colors flex items-center justify-between gap-4 flex-wrap">
+                    <div>
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="font-mono text-sm font-medium text-white">{trip.tripNumber}</span>
+                        <span className="text-sm text-slate-300 flex items-center gap-1"><MapPin size={14} className="text-slate-500"/> {trip.source} → {trip.destination}</span>
+                      </div>
+                      <span className="text-xs text-slate-500">
                         Cargo Weight: {trip.cargoWeight} kg
                       </span>
                     </div>
                     <div>
-                      <span className={`badge badge-${trip.status === 'DISPATCHED' ? 'on_trip' : trip.status === 'DRAFT' ? 'in_shop' : trip.status === 'COMPLETED' ? 'available' : 'retired'}`}>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${getTripStatusStyle(trip.status)}`}>
                         {trip.status}
                       </span>
                     </div>
@@ -414,53 +454,61 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
         </div>
 
         {/* Right Side compliance documents */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className="space-y-6">
           {/* Document upload card */}
-          <div className="card">
-            <h2 className={styles['section-title']}>Compliance Documents</h2>
+          <div className="bg-slate-900 rounded-xl border border-slate-800/60 p-6 shadow-sm">
+            <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Compliance Documents</h2>
             
             {/* List of uploaded documents */}
             {(!vehicle.documents || vehicle.documents.length === 0) ? (
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>No compliance documents registered.</p>
+              <p className="text-sm text-slate-500 mb-6 pb-6 border-b border-slate-800/60">No compliance documents registered.</p>
             ) : (
-              <div className={styles['doc-list']} style={{ marginBottom: '1.5rem' }}>
+              <div className="space-y-3 mb-6 pb-6 border-b border-slate-800/60">
                 {vehicle.documents.map((doc) => (
-                  <div key={doc.id} className={styles['doc-card']}>
-                    <div className={styles['doc-header']}>
-                      <span className={styles['doc-type']}>{doc.documentType}</span>
-                      <div className={styles['doc-actions']}>
+                  <div key={doc.id} className="bg-slate-800/50 border border-slate-700/50 p-3 rounded-lg flex flex-col gap-2 transition-colors hover:bg-slate-800">
+                    <div className="flex justify-between items-start">
+                      <span className="text-sm font-medium text-white">{doc.documentType}</span>
+                      <div className="flex gap-2">
                         <a 
                           href={doc.documentUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className={styles['doc-action-icon']}
+                          className="text-slate-400 hover:text-blue-400 transition-colors p-1"
                           title="View / Download Document"
                         >
-                          <Download size={14} />
+                          <Download size={16} />
                         </a>
                         <button 
                           onClick={() => handleDocDelete(doc.id)}
-                          className={`${styles['doc-action-icon']} ${styles['doc-action-icon-delete']}`}
+                          className="text-slate-400 hover:text-red-400 transition-colors p-1"
                           title="Delete Document"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </div>
                     
-                    <div className={styles['doc-meta']}>
-                      <span>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-slate-400">
                         Expires: {doc.expiryDate || 'No expiry'}
                       </span>
                       
                       {doc.verified ? (
-                        <span className={styles['verified-indicator']} onClick={() => handleToggleDocVerification(doc.id, true)} style={{ cursor: 'pointer' }} title="Toggle to Unverify">
+                        <button 
+                          onClick={() => handleToggleDocVerification(doc.id, true)}
+                          className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors" 
+                          title="Toggle to Unverify"
+                        >
                           <ShieldCheck size={14} /> Verified
-                        </span>
+                        </button>
                       ) : (
-                        <span className={styles['unverified-indicator']} onClick={() => handleToggleDocVerification(doc.id, false)} title="Click to verify document">
+                        <button 
+                          onClick={() => handleToggleDocVerification(doc.id, false)}
+                          className="flex items-center gap-1 text-amber-400 hover:text-amber-300 transition-colors" 
+                          title="Click to verify document"
+                        >
                           <ShieldAlert size={14} /> Unverified
-                        </span>
+                        </button>
                       )}
                     </div>
                   </div>
@@ -468,25 +516,23 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
               </div>
             )}
 
-            <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '1rem 0' }} />
-
             {/* Document upload form */}
-            <h3 style={{ fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              <Plus size={16} /> Upload Registry Document
+            <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+              <Plus size={16} className="text-blue-400" /> Upload Document
             </h3>
-            <form onSubmit={handleDocUpload} className={styles['upload-form']}>
+            <form onSubmit={handleDocUpload} className="space-y-4">
               {uploadError && (
-                <div className={listStyles['alert-danger']} style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}>
+                <div className="p-3 bg-red-500/10 text-red-400 text-sm rounded-lg border border-red-500/20">
                   {uploadError}
                 </div>
               )}
 
-              <div className={listStyles['form-group']}>
-                <label className={listStyles['form-label']}>Document Category</label>
+              <div>
+                <label className={labelClass}>Document Category</label>
                 <select
                   value={docType}
                   onChange={(e) => setDocType(e.target.value)}
-                  className={listStyles['form-input']}
+                  className={inputClass}
                 >
                   <option value="Insurance">Insurance Policy</option>
                   <option value="RC">Registration Certificate (RC)</option>
@@ -496,23 +542,23 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
                 </select>
               </div>
 
-              <div className={listStyles['form-group']}>
-                <label className={listStyles['form-label']}>Expiration Date</label>
+              <div>
+                <label className={labelClass}>Expiration Date</label>
                 <input 
                   type="date" 
                   value={docExpiry}
                   onChange={(e) => setDocExpiry(e.target.value)}
-                  className={listStyles['form-input']}
+                  className={inputClass}
                 />
               </div>
 
-              <div className={listStyles['form-group']}>
-                <label className={listStyles['form-label']}>Upload File (PDF / Image)</label>
+              <div>
+                <label className={labelClass}>Upload File (PDF / Image)</label>
                 <input 
                   type="file" 
                   id="document-file-input"
                   onChange={(e) => setDocFile(e.target.files[0])}
-                  className={listStyles['form-input']}
+                  className={`${inputClass} !py-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-500/10 file:text-blue-400 hover:file:bg-blue-500/20`}
                   accept=".pdf,image/*"
                   required
                 />
@@ -520,9 +566,8 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
 
               <button 
                 type="submit" 
-                className="button button-primary"
+                className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
                 disabled={uploading}
-                style={{ width: '100%', marginTop: '0.5rem' }}
               >
                 {uploading ? 'Uploading...' : 'Upload Document'}
               </button>
@@ -533,192 +578,101 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
 
       {/* Edit Vehicle Modal */}
       {isEditModalOpen && (
-        <div className={listStyles['modal-overlay']}>
-          <div className={listStyles['modal-content']}>
-            <div className={listStyles['modal-header']}>
-              <h2>Edit Vehicle Details</h2>
-              <button onClick={() => setIsEditModalOpen(false)} className={listStyles['close-btn']}>
-                <X size={20} />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-2xl w-full max-w-2xl overflow-hidden my-8">
+            <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center sticky top-0 bg-slate-900 z-10">
+              <h3 className="font-semibold text-lg text-white">Edit Vehicle Details</h3>
+              <button onClick={() => setIsEditModalOpen(false)} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
+                <X size={18} />
               </button>
             </div>
             
             <form onSubmit={handleEditSubmit} autoComplete="off">
-              <div className={listStyles['modal-body']}>
+              <div className="p-6">
                 {editError && (
-                  <div className={listStyles['alert-danger']}>
+                  <div className="mb-6 p-3 bg-red-500/10 text-red-400 text-sm rounded-lg border border-red-500/20">
                     {editError}
                   </div>
                 )}
 
-                <div className={listStyles['form-grid']}>
-                  <div className={listStyles['form-group']}>
-                    <label className={listStyles['form-label']}>Registration Number *</label>
-                    <input 
-                      type="text" 
-                      value={editFormData.registrationNumber}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, registrationNumber: e.target.value }))}
-                      className={listStyles['form-input']}
-                      required
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelClass}>Registration Number *</label>
+                    <input type="text" value={editFormData.registrationNumber} onChange={(e) => setEditFormData(prev => ({ ...prev, registrationNumber: e.target.value }))} className={inputClass} required />
                   </div>
-
-                  <div className={listStyles['form-group']}>
-                    <label className={listStyles['form-label']}>Vehicle Display Name *</label>
-                    <input 
-                      type="text" 
-                      value={editFormData.vehicleName}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, vehicleName: e.target.value }))}
-                      className={listStyles['form-input']}
-                      required
-                    />
+                  <div>
+                    <label className={labelClass}>Vehicle Display Name *</label>
+                    <input type="text" value={editFormData.vehicleName} onChange={(e) => setEditFormData(prev => ({ ...prev, vehicleName: e.target.value }))} className={inputClass} required />
                   </div>
-
-                  <div className={listStyles['form-group']}>
-                    <label className={listStyles['form-label']}>Category *</label>
-                    <select
-                      value={editFormData.categoryId}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, categoryId: e.target.value }))}
-                      className={listStyles['form-input']}
-                      required
-                    >
+                  <div>
+                    <label className={labelClass}>Category *</label>
+                    <select value={editFormData.categoryId} onChange={(e) => setEditFormData(prev => ({ ...prev, categoryId: e.target.value }))} className={inputClass} required>
                       <option value="">Select Category</option>
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
+                      {categories.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
                     </select>
                   </div>
-
-                  <div className={listStyles['form-group']}>
-                    <label className={listStyles['form-label']}>Fuel Type *</label>
-                    <select
-                      value={editFormData.fuelType}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, fuelType: e.target.value }))}
-                      className={listStyles['form-input']}
-                      required
-                    >
+                  <div>
+                    <label className={labelClass}>Fuel Type *</label>
+                    <select value={editFormData.fuelType} onChange={(e) => setEditFormData(prev => ({ ...prev, fuelType: e.target.value }))} className={inputClass} required>
                       <option value="DIESEL">Diesel</option>
                       <option value="PETROL">Petrol</option>
                       <option value="CNG">CNG</option>
                       <option value="EV">Electric (EV)</option>
                     </select>
                   </div>
-
-                  <div className={listStyles['form-group']}>
-                    <label className={listStyles['form-label']}>Manufacturer</label>
-                    <input 
-                      type="text" 
-                      value={editFormData.manufacturer}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, manufacturer: e.target.value }))}
-                      className={listStyles['form-input']}
-                    />
+                  <div>
+                    <label className={labelClass}>Manufacturer</label>
+                    <input type="text" value={editFormData.manufacturer} onChange={(e) => setEditFormData(prev => ({ ...prev, manufacturer: e.target.value }))} className={inputClass} />
                   </div>
-
-                  <div className={listStyles['form-group']}>
-                    <label className={listStyles['form-label']}>Model</label>
-                    <input 
-                      type="text" 
-                      value={editFormData.model}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, model: e.target.value }))}
-                      className={listStyles['form-input']}
-                    />
+                  <div>
+                    <label className={labelClass}>Model</label>
+                    <input type="text" value={editFormData.model} onChange={(e) => setEditFormData(prev => ({ ...prev, model: e.target.value }))} className={inputClass} />
                   </div>
-
-                  <div className={listStyles['form-group']}>
-                    <label className={listStyles['form-label']}>Year</label>
-                    <input 
-                      type="number" 
-                      value={editFormData.year}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, year: e.target.value }))}
-                      className={listStyles['form-input']}
-                    />
+                  <div>
+                    <label className={labelClass}>Year</label>
+                    <input type="number" value={editFormData.year} onChange={(e) => setEditFormData(prev => ({ ...prev, year: e.target.value }))} className={inputClass} />
                   </div>
-
-                  <div className={listStyles['form-group']}>
-                    <label className={listStyles['form-label']}>Max Load Capacity (kg) *</label>
-                    <input 
-                      type="number" 
-                      value={editFormData.capacity}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, capacity: e.target.value }))}
-                      className={listStyles['form-input']}
-                      required
-                    />
+                  <div>
+                    <label className={labelClass}>Max Load Capacity (kg) *</label>
+                    <input type="number" value={editFormData.capacity} onChange={(e) => setEditFormData(prev => ({ ...prev, capacity: e.target.value }))} className={inputClass} required />
                   </div>
-
-                  <div className={listStyles['form-group']}>
-                    <label className={listStyles['form-label']}>Odometer Reading (km)</label>
-                    <input 
-                      type="number" 
-                      value={editFormData.odometer}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, odometer: e.target.value }))}
-                      className={listStyles['form-input']}
-                    />
+                  <div>
+                    <label className={labelClass}>Odometer Reading (km)</label>
+                    <input type="number" value={editFormData.odometer} onChange={(e) => setEditFormData(prev => ({ ...prev, odometer: e.target.value }))} className={inputClass} />
                   </div>
-
-                  <div className={listStyles['form-group']}>
-                    <label className={listStyles['form-label']}>Purchase Cost (INR)</label>
-                    <input 
-                      type="number" 
-                      value={editFormData.purchaseCost}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, purchaseCost: e.target.value }))}
-                      className={listStyles['form-input']}
-                    />
+                  <div>
+                    <label className={labelClass}>Purchase Cost (INR)</label>
+                    <input type="number" value={editFormData.purchaseCost} onChange={(e) => setEditFormData(prev => ({ ...prev, purchaseCost: e.target.value }))} className={inputClass} />
                   </div>
-
-                  <div className={listStyles['form-group']}>
-                    <label className={listStyles['form-label']}>Current Location</label>
-                    <input 
-                      type="text" 
-                      value={editFormData.currentLocation}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, currentLocation: e.target.value }))}
-                      className={listStyles['form-input']}
-                    />
+                  <div>
+                    <label className={labelClass}>Current Location</label>
+                    <input type="text" value={editFormData.currentLocation} onChange={(e) => setEditFormData(prev => ({ ...prev, currentLocation: e.target.value }))} className={inputClass} />
                   </div>
-
-                  <div className={listStyles['form-group']}>
-                    <label className={listStyles['form-label']}>Status</label>
-                    <select
-                      value={editFormData.status}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, status: e.target.value }))}
-                      className={listStyles['form-input']}
-                    >
+                  <div>
+                    <label className={labelClass}>Status</label>
+                    <select value={editFormData.status} onChange={(e) => setEditFormData(prev => ({ ...prev, status: e.target.value }))} className={inputClass}>
                       <option value="AVAILABLE">Available</option>
                       <option value="ON_TRIP">On Trip</option>
                       <option value="IN_SHOP">In Shop</option>
                       <option value="RETIRED">Retired</option>
                     </select>
                   </div>
-
-                  <div className={listStyles['form-group']}>
-                    <label className={listStyles['form-label']}>Insurance Expiry Date</label>
-                    <input 
-                      type="date" 
-                      value={editFormData.insuranceExpiry}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, insuranceExpiry: e.target.value }))}
-                      className={listStyles['form-input']}
-                    />
+                  <div>
+                    <label className={labelClass}>Insurance Expiry Date</label>
+                    <input type="date" value={editFormData.insuranceExpiry} onChange={(e) => setEditFormData(prev => ({ ...prev, insuranceExpiry: e.target.value }))} className={inputClass} />
                   </div>
-
-                  <div className={listStyles['form-group']}>
-                    <label className={listStyles['form-label']}>Pollution Expiry Date</label>
-                    <input 
-                      type="date" 
-                      value={editFormData.pollutionExpiry}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, pollutionExpiry: e.target.value }))}
-                      className={listStyles['form-input']}
-                    />
+                  <div>
+                    <label className={labelClass}>Pollution Expiry Date</label>
+                    <input type="date" value={editFormData.pollutionExpiry} onChange={(e) => setEditFormData(prev => ({ ...prev, pollutionExpiry: e.target.value }))} className={inputClass} />
                   </div>
                 </div>
               </div>
 
-              <div className={listStyles['modal-footer']}>
-                <button 
-                  type="button" 
-                  onClick={() => setIsEditModalOpen(false)} 
-                  className="button button-secondary"
-                >
+              <div className="px-6 py-4 border-t border-slate-800 flex justify-end gap-3 sticky bottom-0 bg-slate-900">
+                <button type="button" onClick={() => setIsEditModalOpen(false)} className="px-4 py-2.5 text-sm font-medium text-slate-400 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors">
                   Cancel
                 </button>
-                <button type="submit" className="button button-primary">
+                <button type="submit" className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-all shadow-lg shadow-blue-500/20">
                   Save Changes
                 </button>
               </div>

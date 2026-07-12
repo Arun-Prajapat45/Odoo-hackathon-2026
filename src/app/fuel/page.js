@@ -14,8 +14,9 @@ export default async function FuelPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-slate-800">Fuel Logs</h1>
+      <div>
+        <h1 className="text-2xl font-bold text-white">Fuel Logs</h1>
+        <p className="text-slate-400 text-sm mt-1">Track fuel consumption and costs across the fleet</p>
       </div>
       
       <FuelClient 

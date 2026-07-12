@@ -14,8 +14,9 @@ export default async function ExpensePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-slate-800">Expense Logs</h1>
+      <div>
+        <h1 className="text-2xl font-bold text-white">Expense Logs</h1>
+        <p className="text-slate-400 text-sm mt-1">Track tolls, permits, and other operational expenses</p>
       </div>
       
       <ExpenseClient 

@@ -2,7 +2,7 @@ import "./globals.css";
 import Link from 'next/link';
 
 export const metadata = {
-  title: "TransitOps Platform",
+  title: "TransitOps — Fleet Management",
   description: "Smart Transport Operations Platform",
 };
 
@@ -19,6 +19,9 @@ export default function RootLayout({ children }) {
           <nav className="flex-1 mt-6 px-4 space-y-2">
             <Link href="/" className="flex items-center px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors">
               <span className="font-medium">Dashboard</span>
+            </Link>
+            <Link href="/drivers" className="flex items-center px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors">
+              <span className="font-medium">Driver Management</span>
             </Link>
             <Link href="/trips" className="flex items-center px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors">
               <span className="font-medium">Trip Management</span>

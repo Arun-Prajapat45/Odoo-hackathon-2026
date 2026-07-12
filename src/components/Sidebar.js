@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Users, Bell, LogOut, Truck, X } from 'lucide-react';
+import { LayoutDashboard, Users, Bell, LogOut, Truck, X, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function Sidebar({ userRole, isOpen, onClose }) {
@@ -27,6 +27,7 @@ export default function Sidebar({ userRole, isOpen, onClose }) {
 
   const links = [
     { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
+    { href: '/dashboard/ai-assistant', label: 'AI Assistant', icon: Sparkles },
     { href: '/dashboard/users', label: 'User Management', icon: Users, roles: ['Admin', 'Fleet Manager'] },
     { href: '/dashboard/notifications', label: 'Notifications', icon: Bell, count: unread },
   ];

@@ -4,92 +4,100 @@ import { verifyToken } from '@/lib/auth.js';
 
 /**
  * Gather real-time telemetry from remote database to inject into AI context
+ * Uses Promise.allSettled so a single ngrok network timeout doesn't break the entire snapshot
  */
 async function gatherFleetTelemetrySnapshot() {
-  try {
-    const [
-      maintenanceVehicles,
-      availableDrivers,
-      expiringLicenses,
-      fuelConsumption,
-      vehicleStatuses,
-      financialSummary,
-      activeTrips
-    ] = await Promise.all([
-      // 1. Vehicles under maintenance or in shop
-      queryDb(`
-        SELECT v.id, v.registration_number, v.vehicle_name, vc.name as category, v.status,
-               m.maintenance_type, m.description, m.priority, m.scheduled_date, m.cost
-        FROM vehicle v
-        LEFT JOIN vehicle_category vc ON v.category_id = vc.id
-        LEFT JOIN maintenance m ON v.id = m.vehicle_id AND m.status = 'ACTIVE'
-        WHERE v.status = 'IN_SHOP' OR m.status = 'ACTIVE'
-      `),
-      // 2. Available drivers
-      queryDb(`
-        SELECT d.id, d.employee_code, u.name, d.phone, d.license_number, d.license_type, d.safety_score, d.status
-        FROM driver d
-        JOIN user u ON d.user_id = u.id
-        WHERE d.status = 'AVAILABLE'
-      `),
-      // 3. Licenses expiring in next 45 days (or already expired)
-      queryDb(`
-        SELECT u.name, d.employee_code, d.license_number, d.license_type, d.license_expiry
-        FROM driver d
-        JOIN user u ON d.user_id = u.id
-        WHERE d.license_expiry <= DATE_ADD(CURRENT_DATE, INTERVAL 45 DAY)
-        ORDER BY d.license_expiry ASC
-      `),
-      // 4. Highest fuel-consuming vehicles
-      queryDb(`
-        SELECT v.registration_number, v.vehicle_name,
-               COALESCE(SUM(f.liters), 0) as total_liters,
-               COALESCE(SUM(f.total_cost), 0) as total_fuel_cost
-        FROM vehicle v
-        LEFT JOIN fuel_log f ON v.id = f.vehicle_id
-        GROUP BY v.id, v.registration_number, v.vehicle_name
-        ORDER BY total_liters DESC
-        LIMIT 6
-      `),
-      // 5. Fleet utilization (count by status)
-      queryDb(`
-        SELECT status, COUNT(*) as count FROM vehicle GROUP BY status
-      `),
-      // 6. Operational cost summary
-      queryDb(`
-        SELECT
-          (SELECT COALESCE(SUM(cost), 0) FROM maintenance) as total_maintenance_cost,
-          (SELECT COALESCE(SUM(total_cost), 0) FROM fuel_log) as total_fuel_cost,
-          (SELECT COALESCE(SUM(amount), 0) FROM expense) as total_other_expenses,
-          (SELECT COALESCE(SUM(revenue), 0) FROM trip WHERE status = 'COMPLETED') as total_trip_revenue
-      `),
-      // 7. Active or Dispatched trips
-      queryDb(`
-        SELECT t.trip_number, v.registration_number as vehicle, u.name as driver,
-               t.source, t.destination, t.cargo_weight, t.status
-        FROM trip t
-        JOIN vehicle v ON t.vehicle_id = v.id
-        JOIN driver d ON t.driver_id = d.id
-        JOIN user u ON d.user_id = u.id
-        WHERE t.status IN ('DISPATCHED', 'DRAFT')
-        LIMIT 10
-      `)
-    ]);
+  const safeQuery = async (sql) => {
+    try {
+      return await queryDb(sql);
+    } catch (err) {
+      console.warn(`[Telemetry Query Warning]: ${err.message}`);
+      return null;
+    }
+  };
 
-    return JSON.stringify({
-      timestamp: new Date().toISOString(),
-      vehiclesUnderMaintenance: maintenanceVehicles || [],
-      availableDrivers: availableDrivers || [],
-      licensesExpiringSoon: expiringLicenses || [],
-      topFuelConsumingVehicles: fuelConsumption || [],
-      fleetUtilizationByStatus: vehicleStatuses || [],
-      financialCostAndRevenueSummary: (financialSummary && financialSummary[0]) || {},
-      activeTrips: activeTrips || []
-    }, null, 2);
-  } catch (err) {
-    console.error('[Telemetry Snapshot Error]:', err);
-    return JSON.stringify({ error: 'Failed to query live telemetry data', details: err.message });
-  }
+  // Run in 2 batches of 4 so we don't overload ngrok free tier concurrent request limit (`fetch failed`)
+  const [maintenanceVehicles, availableDrivers, allDrivers, expiringLicenses] = await Promise.all([
+    // 1. Vehicles under maintenance or in shop
+    safeQuery(`
+      SELECT v.id, v.registration_number, v.vehicle_name, vc.name as category, v.status,
+             m.maintenance_type, m.description, m.priority, m.scheduled_date, m.cost
+      FROM vehicle v
+      LEFT JOIN vehicle_category vc ON v.category_id = vc.id
+      LEFT JOIN maintenance m ON v.id = m.vehicle_id AND m.status = 'ACTIVE'
+      WHERE v.status = 'IN_SHOP' OR m.status = 'ACTIVE'
+    `),
+    // 2. Available drivers right now
+    safeQuery(`
+      SELECT d.id, d.employee_code, u.name, d.phone, d.license_number, d.license_type, d.safety_score, d.status
+      FROM driver d
+      JOIN user u ON d.user_id = u.id
+      WHERE d.status = 'AVAILABLE'
+    `),
+    // 3. All drivers with their current status (so AI can explain who is on trip or off duty)
+    safeQuery(`
+      SELECT d.id, d.employee_code, u.name, d.phone, d.license_number, d.license_type, d.safety_score, d.status
+      FROM driver d
+      JOIN user u ON d.user_id = u.id
+    `),
+    // 4. Licenses expiring in next 45 days
+    safeQuery(`
+      SELECT u.name, d.employee_code, d.license_number, d.license_type, d.license_expiry
+      FROM driver d
+      JOIN user u ON d.user_id = u.id
+      WHERE d.license_expiry <= DATE_ADD(CURRENT_DATE, INTERVAL 45 DAY)
+      ORDER BY d.license_expiry ASC
+    `)
+  ]);
+
+  const [fuelConsumption, vehicleStatuses, financialSummary, activeTrips] = await Promise.all([
+    // 5. Highest fuel-consuming vehicles
+    safeQuery(`
+      SELECT v.registration_number, v.vehicle_name,
+             COALESCE(SUM(f.liters), 0) as total_liters,
+             COALESCE(SUM(f.total_cost), 0) as total_fuel_cost
+      FROM vehicle v
+      LEFT JOIN fuel_log f ON v.id = f.vehicle_id
+      GROUP BY v.id, v.registration_number, v.vehicle_name
+      ORDER BY total_liters DESC
+      LIMIT 6
+    `),
+    // 6. Fleet utilization (count by status)
+    safeQuery(`
+      SELECT status, COUNT(*) as count FROM vehicle GROUP BY status
+    `),
+    // 7. Operational cost summary
+    safeQuery(`
+      SELECT
+        (SELECT COALESCE(SUM(cost), 0) FROM maintenance) as total_maintenance_cost,
+        (SELECT COALESCE(SUM(total_cost), 0) FROM fuel_log) as total_fuel_cost,
+        (SELECT COALESCE(SUM(amount), 0) FROM expense) as total_other_expenses,
+        (SELECT COALESCE(SUM(revenue), 0) FROM trip WHERE status = 'COMPLETED') as total_trip_revenue
+    `),
+    // 8. Active or Dispatched trips
+    safeQuery(`
+      SELECT t.trip_number, v.registration_number as vehicle, u.name as driver,
+             t.source, t.destination, t.cargo_weight, t.status
+      FROM trip t
+      JOIN vehicle v ON t.vehicle_id = v.id
+      JOIN driver d ON t.driver_id = d.id
+      JOIN user u ON d.user_id = u.id
+      WHERE t.status IN ('DISPATCHED', 'DRAFT')
+      LIMIT 10
+    `)
+  ]);
+
+  return JSON.stringify({
+    timestamp: new Date().toISOString(),
+    vehiclesUnderMaintenance: maintenanceVehicles || [],
+    availableDrivers: availableDrivers || [],
+    allDriversAndTheirStatus: allDrivers || [],
+    licensesExpiringSoon: expiringLicenses || [],
+    topFuelConsumingVehicles: fuelConsumption || [],
+    fleetUtilizationByStatus: vehicleStatuses || [],
+    financialCostAndRevenueSummary: (financialSummary && financialSummary[0]) || {},
+    activeTrips: activeTrips || []
+  }, null, 2);
 }
 
 export async function POST(request) {

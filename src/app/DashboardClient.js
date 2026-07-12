@@ -62,10 +62,10 @@ export default function DashboardClient({ kpis, fuelData, expenseData }) {
             <Link
               key={idx}
               href={card.href}
-              className="glass-card p-5 flex items-center justify-between gap-4 hover:border-blue-500/60 transition-all group relative overflow-hidden"
+              className="saas-card p-5 flex items-center justify-between gap-4 hover:border-blue-500/60 transition-all group relative overflow-hidden"
             >
               <div className="flex-1 min-w-0 z-10">
-                <span className="inline-block px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                <span className="inline-block px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
                   {card.badge}
                 </span>
                 <p className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none mt-1">
@@ -86,13 +86,13 @@ export default function DashboardClient({ kpis, fuelData, expenseData }) {
       </div>
 
       {/* Quick Action Shortcuts Banner */}
-      <div className="glass-card p-5 w-full bg-gradient-to-r from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-slate-900 dark:via-blue-950/20 dark:to-indigo-950/20">
+      <div className="saas-card p-5 w-full bg-gradient-to-r from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-slate-900 dark:via-blue-950/20 dark:to-indigo-950/20">
         <div className="flex items-center justify-between mb-3.5">
           <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
             <PlusCircle size={14} className="text-blue-500" />
             <span>Quick Operational Actions</span>
           </h3>
-          <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">1-Click Fast Workflow</span>
+          <span className="text-sm text-slate-400 font-medium hidden sm:inline">1-Click Fast Workflow</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
@@ -113,7 +113,7 @@ export default function DashboardClient({ kpis, fuelData, expenseData }) {
                   <p className="text-xs font-bold text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
                     {qa.title}
                   </p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate mt-0.5">
                     {qa.desc}
                   </p>
                 </div>
@@ -126,7 +126,7 @@ export default function DashboardClient({ kpis, fuelData, expenseData }) {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 w-full">
         {/* Fuel Consumption Area Chart */}
-        <div className="glass-card p-5 md:p-6 flex flex-col">
+        <div className="saas-card p-5 md:p-6 flex flex-col">
           <div className="flex items-center justify-between mb-5">
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -195,7 +195,7 @@ export default function DashboardClient({ kpis, fuelData, expenseData }) {
         </div>
 
         {/* Daily Expenses Bar Chart */}
-        <div className="glass-card p-5 md:p-6 flex flex-col">
+        <div className="saas-card p-5 md:p-6 flex flex-col">
           <div className="flex items-center justify-between mb-5">
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">

@@ -163,7 +163,7 @@ export default function DriverDetailPage({ params: paramsPromise }) {
   if (loading) {
     return (
       <AppShell>
-        <div className="glass-card p-16 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+        <div className="saas-card p-16 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
           <RefreshCw size={32} className="animate-spin mb-3 text-emerald-500" />
           <p className="text-sm font-semibold">Loading driver profile and license history...</p>
         </div>
@@ -191,7 +191,7 @@ export default function DriverDetailPage({ params: paramsPromise }) {
       </div>
 
       {/* Driver Header Card */}
-      <div className="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative overflow-hidden">
+      <div className="saas-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative overflow-hidden">
         {/* Decorative glow */}
         <div className="absolute -top-12 -left-12 w-32 h-32 bg-blue-500/20 blur-3xl rounded-full pointer-events-none" />
         
@@ -266,44 +266,44 @@ export default function DriverDetailPage({ params: paramsPromise }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {/* Driver License & Credentials Card */}
-          <div className="glass-card p-6 relative overflow-hidden">
+          <div className="saas-card p-6 relative overflow-hidden">
             <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-5 flex items-center justify-between">
               <span>Driver Credentials & Telemetry Details</span>
               <span className="text-blue-600 dark:text-blue-400 font-bold">{driver.license_type || 'HMV'} Category</span>
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-6 gap-x-4">
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">License Number</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">License Number</span>
                 <span className="text-sm font-mono font-bold text-slate-900 dark:text-white mt-0.5 block">{driver.license_number || '—'}</span>
               </div>
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">License Type</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">License Type</span>
                 <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">{driver.license_type || 'HMV'}</span>
               </div>
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Expiry Date</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">Expiry Date</span>
                 <span className={`text-sm font-bold mt-0.5 block flex items-center gap-1 ${isExpired ? 'text-red-600 dark:text-red-400' : isExpiringSoon ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}`}>
                   <Calendar size={14} />
                   <span>{driver.license_expiry || '—'}</span>
                 </span>
               </div>
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Phone Number</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">Phone Number</span>
                 <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">{driver.phone || 'No phone'}</span>
               </div>
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Joining Date</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">Joining Date</span>
                 <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">{driver.joining_date || 'N/A'}</span>
               </div>
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Safety Rating</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">Safety Rating</span>
                 <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">{driver.safety_score || 100} / 100 Points</span>
               </div>
             </div>
           </div>
 
           {/* Assigned Trip Manifests */}
-          <div className="glass-card overflow-hidden mt-6">
+          <div className="saas-card overflow-hidden mt-6">
             <div className="p-4 md:p-5 border-b border-slate-200/50 dark:border-white/10 bg-transparent flex items-center justify-between">
               <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 Dispatched Trip History ({driver.trips?.length || 0})
@@ -317,7 +317,7 @@ export default function DriverDetailPage({ params: paramsPromise }) {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">
+                    <tr className="border-b border-slate-100 dark:border-slate-800 text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">
                       <th className="py-3 px-4">Trip #</th>
                       <th className="py-3 px-4">Route Manifest</th>
                       <th className="py-3 px-4">Status</th>
@@ -357,7 +357,7 @@ export default function DriverDetailPage({ params: paramsPromise }) {
         {/* Right Column (Status Override & License History) */}
         <div className="space-y-6">
           {/* Status Override Card */}
-          <div className="glass-card p-6">
+          <div className="saas-card p-6">
             <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3.5 flex items-center gap-2">
               <Shield size={16} className="text-emerald-500" />
               <span>Duty Status Manual Override</span>
@@ -387,7 +387,7 @@ export default function DriverDetailPage({ params: paramsPromise }) {
           </div>
 
           {/* License Records Card */}
-          <div className="glass-card p-6 space-y-4">
+          <div className="saas-card p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 License Renewal History ({driver.licenses?.length || 0})
@@ -415,11 +415,11 @@ export default function DriverDetailPage({ params: paramsPromise }) {
                         <span className="font-mono text-xs font-bold text-slate-900 dark:text-white">
                           {l.license_number}
                         </span>
-                        <span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-[10px] font-bold uppercase">
+                        <span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-xs font-bold uppercase">
                           {l.category}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
+                      <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
                         <span>Issued: {l.issue_date}</span>
                         <span className={`font-bold ${lDays < 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-700 dark:text-slate-300'}`}>
                           Exp: {l.expiry_date}
@@ -427,7 +427,7 @@ export default function DriverDetailPage({ params: paramsPromise }) {
                       </div>
                       {l.document_url && (
                         <div className="pt-1">
-                          <a href={l.document_url} target="_blank" rel="noreferrer" className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1">
+                          <a href={l.document_url} target="_blank" rel="noreferrer" className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1">
                             <ExternalLink size={12} /> View Document Scan
                           </a>
                         </div>

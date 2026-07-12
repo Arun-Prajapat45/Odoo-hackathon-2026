@@ -102,7 +102,7 @@ export default async function ReportsPage() {
   return (
     <div className="space-y-6">
       {/* Header Card */}
-      <div className="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-indigo-900/10 via-purple-900/10 to-slate-900/5">
+      <div className="saas-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-indigo-900/10 via-purple-900/10 to-slate-900/5">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
             <PieChart size={24} />
@@ -137,7 +137,7 @@ export default async function ReportsPage() {
       />
 
       {/* Financial Breakdown Table */}
-      <div className="glass-card overflow-hidden">
+      <div className="saas-card overflow-hidden">
         <div className="p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
           <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
             <CheckCircle2 size={16} className="text-blue-500" />
@@ -149,7 +149,7 @@ export default async function ReportsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider bg-slate-50/20 dark:bg-slate-800/20">
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider bg-slate-50/20 dark:bg-slate-800/20">
                 <th className="py-3.5 px-6">Metric Description</th>
                 <th className="py-3.5 px-6 text-right">Computed Value</th>
                 <th className="py-3.5 px-6">Classification</th>
@@ -161,7 +161,7 @@ export default async function ReportsPage() {
                 <td className="py-4 px-6 text-right font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
                   + ₹{totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </td>
-                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[10px] uppercase font-bold">Revenue</span></td>
+                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs uppercase font-bold">Revenue</span></td>
               </tr>
 
               <tr className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
@@ -169,7 +169,7 @@ export default async function ReportsPage() {
                 <td className="py-4 px-6 text-right font-bold text-amber-600 dark:text-amber-400 font-mono">
                   - ₹{totalFuelCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </td>
-                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-[10px] uppercase font-bold">Operational Expense</span></td>
+                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs uppercase font-bold">Operational Expense</span></td>
               </tr>
 
               <tr className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
@@ -177,7 +177,7 @@ export default async function ReportsPage() {
                 <td className="py-4 px-6 text-right font-bold text-blue-600 dark:text-blue-400 font-mono">
                   - ₹{totalMaintenanceCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </td>
-                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-[10px] uppercase font-bold">Operational Expense</span></td>
+                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-xs uppercase font-bold">Operational Expense</span></td>
               </tr>
 
               <tr className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
@@ -185,7 +185,7 @@ export default async function ReportsPage() {
                 <td className="py-4 px-6 text-right font-bold text-purple-600 dark:text-purple-400 font-mono">
                   - ₹{totalOtherExpenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </td>
-                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] uppercase font-bold">Operational Expense</span></td>
+                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs uppercase font-bold">Operational Expense</span></td>
               </tr>
 
               <tr className="bg-slate-50 dark:bg-slate-800/40 font-extrabold border-t-2 border-slate-200 dark:border-slate-700">
@@ -194,7 +194,7 @@ export default async function ReportsPage() {
                   {profit >= 0 ? '+' : ''} ₹{profit.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </td>
                 <td className="py-4 px-6">
-                  <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${profit >= 0 ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}>
+                  <span className={`px-2 py-0.5 rounded text-xs uppercase font-bold ${profit >= 0 ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}>
                     {profit >= 0 ? 'Net Surplus' : 'Net Deficit'}
                   </span>
                 </td>
@@ -205,7 +205,7 @@ export default async function ReportsPage() {
                 <td className="py-4 px-6 text-right font-bold text-slate-900 dark:text-white font-mono">
                   ₹{totalAcquisitionCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </td>
-                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] uppercase font-bold">Capital Asset</span></td>
+                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs uppercase font-bold">Capital Asset</span></td>
               </tr>
             </tbody>
           </table>

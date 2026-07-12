@@ -108,7 +108,7 @@ export default function NotificationsPage() {
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-900/10 via-slate-900/5 to-purple-900/10">
+      <div className="saas-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-900/10 via-slate-900/5 to-purple-900/10">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25">
             <Bell size={24} />
@@ -175,7 +175,7 @@ export default function NotificationsPage() {
                 }`}
               >
                 <span>{tab === 'UNREAD' ? 'Unread Only' : tab}</span>
-                <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
+                <span className={`px-1.5 py-0.5 rounded-full text-xs ${
                   isActive ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
                 }`}>
                   {count}
@@ -191,12 +191,12 @@ export default function NotificationsPage() {
 
       {/* Notifications List Feed */}
       {loading ? (
-        <div className="glass-card p-12 text-center text-slate-400 dark:text-slate-500">
+        <div className="saas-card p-12 text-center text-slate-400 dark:text-slate-500">
           <RefreshCw size={28} className="animate-spin mx-auto mb-3 text-blue-500" />
           <p className="text-sm font-semibold">Loading system feed...</p>
         </div>
       ) : filteredNotifs.length === 0 ? (
-        <div className="glass-card p-16 text-center text-slate-400 dark:text-slate-500 max-w-md mx-auto">
+        <div className="saas-card p-16 text-center text-slate-400 dark:text-slate-500 max-w-md mx-auto">
           <CheckCircle2 size={40} className="mx-auto mb-3 text-emerald-500/70" />
           <h3 className="text-base font-bold text-slate-800 dark:text-white">No notifications found</h3>
           <p className="text-xs mt-1 text-slate-500">
@@ -213,7 +213,7 @@ export default function NotificationsPage() {
             return (
               <div
                 key={n.id}
-                className={`glass-card p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${
+                className={`saas-card p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${
                   !n.read
                     ? 'border-l-4 border-l-blue-500 bg-blue-50/40 dark:bg-blue-500/[0.04]'
                     : 'opacity-85 hover:opacity-100'
@@ -230,7 +230,7 @@ export default function NotificationsPage() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2.5 mb-1 flex-wrap">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                      <span className={`px-2 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider ${
                         isCritical ? 'bg-red-500 text-white' :
                         isWarning ? 'bg-amber-500 text-white' :
                         'bg-blue-500 text-white'
@@ -247,7 +247,7 @@ export default function NotificationsPage() {
                     <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                       {n.message}
                     </p>
-                    <div className="flex items-center gap-4 mt-2 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                    <div className="flex items-center gap-4 mt-2 text-sm text-slate-400 dark:text-slate-500 font-medium">
                       <span>{n.created_at ? new Date(n.created_at).toLocaleString() : 'Just now'}</span>
                     </div>
                   </div>

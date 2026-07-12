@@ -22,7 +22,7 @@ export default function NotificationPanel({ notifications = [], onToggleRead, on
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="glass-card">
+    <div className="saas-card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Dispatch & System Feed</h2>

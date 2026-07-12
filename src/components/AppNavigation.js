@@ -112,7 +112,7 @@ export default function AppNavigation({ user, children }) {
 
   const renderNavList = (onItemClick) => (
     <nav className="flex-1 px-3 space-y-1 overflow-y-auto py-3">
-      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 pb-2">
+      <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 pb-2">
         Fleet Module
       </p>
       {filteredLinks.map((link) => {
@@ -123,14 +123,14 @@ export default function AppNavigation({ user, children }) {
             key={link.href}
             href={link.href}
             onClick={onItemClick}
-            className={`group flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 ${
+            className={`group flex items-center justify-between px-3.5 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${
               isActive
                 ? link.highlight
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.4)] font-bold'
-                  : 'bg-white/60 dark:bg-white/10 text-slate-900 dark:text-white font-bold shadow-sm border border-slate-200/50 dark:border-white/10 backdrop-blur-md'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-black font-semibold shadow-sm'
+                  : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-sm border border-slate-200 dark:border-slate-700'
                 : link.highlight
-                ? 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/5'
+                ? 'text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -139,17 +139,17 @@ export default function AppNavigation({ user, children }) {
                 className={`${
                   isActive
                     ? link.highlight
-                      ? 'text-white'
+                      ? 'text-white dark:text-black'
                       : 'text-slate-900 dark:text-white'
                     : link.highlight
-                    ? 'text-indigo-500'
+                    ? 'text-slate-700 dark:text-slate-300'
                     : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'
                 } transition-colors`}
               />
               <span>{link.name}</span>
             </div>
             {link.badge > 0 && (
-              <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-red-500 text-white animate-pulse">
+              <span className="px-2 py-0.5 text-sm font-bold rounded-full bg-red-500 text-white animate-pulse">
                 {link.badge}
               </span>
             )}
@@ -160,11 +160,11 @@ export default function AppNavigation({ user, children }) {
   );
 
   return (
-    <div className="flex h-screen w-full flex-1 bg-transparent text-slate-900 dark:text-slate-100 overflow-hidden transition-colors duration-200">
+    <div className="flex h-screen w-full flex-1 bg-slate-50 dark:bg-[#111111] text-slate-900 dark:text-slate-100 overflow-hidden transition-colors duration-200">
       {/* ── Desktop Sidebar ── */}
-      <aside className="w-[260px] flex-shrink-0 hidden md:flex flex-col bg-white/50 dark:bg-black/30 backdrop-blur-2xl border-r border-slate-200/50 dark:border-white/10 transition-colors z-40">
+      <aside className="w-[260px] flex-shrink-0 hidden md:flex flex-col bg-[#fcfcfc] dark:bg-[#000000] border-r border-slate-200 dark:border-white/10 transition-colors z-40">
         {/* Logo */}
-        <div className="px-6 py-5 border-b border-slate-200/50 dark:border-white/10">
+        <div className="px-6 py-5 border-b border-slate-200 dark:border-white/10">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
               <Truck size={20} className="text-white" />
@@ -173,7 +173,7 @@ export default function AppNavigation({ user, children }) {
               <h1 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-none">
                 TransitOps
               </h1>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold tracking-wider mt-1 uppercase">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wider mt-1 uppercase">
                 Enterprise v2.0
               </p>
             </div>
@@ -184,14 +184,14 @@ export default function AppNavigation({ user, children }) {
         {renderNavList()}
 
         {/* User Profile Card */}
-        <div className="p-3.5 border-t border-slate-200/50 dark:border-white/10 mt-auto bg-transparent space-y-2.5">
-          <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-white/60 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 shadow-sm backdrop-blur-md overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-800 to-black dark:from-white dark:to-slate-200 flex items-center justify-center text-xs font-bold text-white dark:text-black shadow shrink-0">
+        <div className="p-3.5 border-t border-slate-200 dark:border-white/10 mt-auto bg-transparent space-y-2.5">
+          <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white dark:bg-[#111111] border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
+            <div className="w-8 h-8 rounded-md bg-slate-900 dark:bg-white flex items-center justify-center text-xs font-bold text-white dark:text-black shadow shrink-0">
               {user.name?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
-              <p className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 truncate">{user.roleName || 'Fleet Role'}</p>
+              <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 truncate">{user.roleName || 'Fleet Role'}</p>
             </div>
           </div>
           <LogoutButton />
@@ -213,7 +213,7 @@ export default function AppNavigation({ user, children }) {
                 </div>
                 <div>
                   <h1 className="text-base font-bold text-slate-900 dark:text-white">TransitOps</h1>
-                  <p className="text-[10px] text-slate-500">Fleet Control</p>
+                  <p className="text-xs text-slate-500">Fleet Control</p>
                 </div>
               </div>
               <button
@@ -245,12 +245,12 @@ export default function AppNavigation({ user, children }) {
       {/* ── Main Layout Area ── */}
       <main className="flex-1 flex flex-col overflow-hidden min-w-0 z-10">
         {/* Top Header */}
-        <header className="h-16 bg-white/40 dark:bg-black/20 backdrop-blur-2xl border-b border-slate-200/50 dark:border-white/10 flex items-center justify-between px-4 md:px-8 shrink-0 z-30 transition-colors">
+        <header className="h-16 bg-[#fcfcfc] dark:bg-[#000000] border-b border-slate-200 dark:border-white/10 flex items-center justify-between px-4 md:px-8 shrink-0 z-30 transition-colors">
           <div className="flex items-center gap-3">
             {/* Mobile Menu Trigger */}
             <button
               onClick={() => setMobileOpen(true)}
-              className="md:hidden p-2 -ml-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="md:hidden p-2 -ml-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111111] transition-colors"
               aria-label="Open sidebar"
             >
               <Menu size={22} />
@@ -273,9 +273,9 @@ export default function AppNavigation({ user, children }) {
             {/* AI Assistant Quick Trigger */}
             <Link
               href="/ai-assistant"
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-500/20 text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all shadow-sm"
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all shadow-sm"
             >
-              <Sparkles size={14} className="animate-spin-slow" />
+              <Sparkles size={14} />
               <span>AI Copilot</span>
             </Link>
 
@@ -298,7 +298,7 @@ export default function AppNavigation({ user, children }) {
                     <div className="flex items-center gap-2">
                       <h3 className="font-bold text-sm text-slate-900 dark:text-white">Notifications</h3>
                       {unreadNotifs.length > 0 && (
-                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400">
+                        <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400">
                           {unreadNotifs.length} new
                         </span>
                       )}
@@ -360,10 +360,10 @@ export default function AppNavigation({ user, children }) {
                                   <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
                                 )}
                               </div>
-                              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
+                              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
                                 {n.message}
                               </p>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block">
+                              <span className="text-xs text-slate-400 dark:text-slate-500 mt-1 block">
                                 {n.created_at ? new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
                               </span>
                             </div>
@@ -380,13 +380,13 @@ export default function AppNavigation({ user, children }) {
             <ThemeToggle />
 
             {/* User Avatar Chip (Desktop) */}
-            <div className="hidden md:flex items-center gap-2.5 pl-3 border-l border-slate-200/50 dark:border-white/10">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-800 to-black dark:from-white dark:to-slate-200 flex items-center justify-center text-xs font-bold text-white dark:text-black shadow-sm">
+            <div className="hidden md:flex items-center gap-2.5 pl-3 border-l border-slate-200 dark:border-white/10">
+              <div className="w-8 h-8 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center text-xs font-bold text-white dark:text-black shadow-sm">
                 {user.name?.charAt(0).toUpperCase()}
               </div>
               <div className="text-left">
                 <p className="text-xs font-bold text-slate-800 dark:text-white leading-none">{user.name}</p>
-                <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">{user.roleName}</p>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">{user.roleName}</p>
               </div>
             </div>
           </div>

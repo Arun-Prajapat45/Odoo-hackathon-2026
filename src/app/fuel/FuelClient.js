@@ -30,25 +30,25 @@ export default function FuelClient({ initialLogs = [], vehicles = [], createActi
     <div className="space-y-6">
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="glass-card p-4.5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Fuel Volume</span>
+        <div className="saas-card p-4.5">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Fuel Volume</span>
           <p className="text-2xl font-extrabold mt-0.5 text-blue-600 dark:text-blue-400">{totalLiters.toFixed(1)} <span className="text-sm font-normal text-slate-500">Liters</span></p>
           <p className="text-xs font-semibold text-slate-500 mt-1">Refueled Across Fleet</p>
         </div>
-        <div className="glass-card p-4.5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Fuel Expenditure</span>
+        <div className="saas-card p-4.5">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Fuel Expenditure</span>
           <p className="text-2xl font-extrabold mt-0.5 text-emerald-600 dark:text-emerald-400">₹{totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           <p className="text-xs font-semibold text-slate-500 mt-1">Cumulative Fuel Spend</p>
         </div>
-        <div className="glass-card p-4.5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Average Rate / Liter</span>
+        <div className="saas-card p-4.5">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Average Rate / Liter</span>
           <p className="text-2xl font-extrabold mt-0.5 text-indigo-600 dark:text-indigo-400">₹{avgPrice.toFixed(2)}</p>
           <p className="text-xs font-semibold text-slate-500 mt-1">Weighted Fleet Average</p>
         </div>
       </div>
 
       {/* Filter & Action Bar */}
-      <div className="glass-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="saas-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
           <input
@@ -70,11 +70,11 @@ export default function FuelClient({ initialLogs = [], vehicles = [], createActi
       </div>
 
       {/* Fuel Logs Table */}
-      <div className="glass-card overflow-hidden">
+      <div className="saas-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 <th className="py-3.5 px-4 md:px-6">Log Date</th>
                 <th className="py-3.5 px-4">Carrier Vehicle</th>
                 <th className="py-3.5 px-4">Volume Refueled</th>
@@ -100,13 +100,13 @@ export default function FuelClient({ initialLogs = [], vehicles = [], createActi
                     ) : (
                       <span className="text-xs text-slate-400 font-mono">{log.registration_number || 'N/A'}</span>
                     )}
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                       {log.vehicle_name || 'Fleet Unit'}
                     </p>
                   </td>
 
                   <td className="py-4 px-4 font-bold text-xs text-blue-600 dark:text-blue-400">
-                    {Number(log.liters || 0).toFixed(2)} <span className="text-[10px] text-slate-400 font-normal">Liters</span>
+                    {Number(log.liters || 0).toFixed(2)} <span className="text-xs text-slate-400 font-normal">Liters</span>
                   </td>
 
                   <td className="py-4 px-4 text-xs text-slate-600 dark:text-slate-400 font-semibold">

@@ -145,7 +145,7 @@ export default function MaintenancePage() {
       MEDIUM: 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-500/30 font-semibold',
       LOW: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700 font-medium',
     };
-    return <span className={`px-2.5 py-1 rounded-lg text-[11px] uppercase tracking-wider border inline-flex items-center gap-1 ${styles[priority] || styles.LOW}`}>
+    return <span className={`px-2.5 py-1 rounded-lg text-sm uppercase tracking-wider border inline-flex items-center gap-1 ${styles[priority] || styles.LOW}`}>
       {priority === 'CRITICAL' && <ShieldAlert size={12} />}
       <span>{priority}</span>
     </span>;
@@ -164,7 +164,7 @@ export default function MaintenancePage() {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-amber-900/10 via-orange-900/10 to-slate-900/5">
+      <div className="saas-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-amber-900/10 via-orange-900/10 to-slate-900/5">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-amber-500/25">
             <Wrench size={24} />
@@ -204,8 +204,8 @@ export default function MaintenancePage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((s) => (
-          <div key={s.label} className="glass-card p-4.5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+          <div key={s.label} className="saas-card p-4.5">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">
               {s.badge}
             </span>
             <p className={`text-2xl font-extrabold mt-0.5 ${s.color}`}>{s.value}</p>
@@ -225,7 +225,7 @@ export default function MaintenancePage() {
           </div>
           <button
             onClick={() => setPriorityFilter('CRITICAL')}
-            className="px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold text-[11px] hover:bg-red-700 transition-colors"
+            className="px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold text-sm hover:bg-red-700 transition-colors"
           >
             Filter Critical Due
           </button>
@@ -233,7 +233,7 @@ export default function MaintenancePage() {
       )}
 
       {/* Filter & Search Bar */}
-      <div className="glass-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="saas-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
           <input
@@ -269,12 +269,12 @@ export default function MaintenancePage() {
 
       {/* Maintenance Table */}
       {loading ? (
-        <div className="glass-card p-12 text-center text-slate-400 dark:text-slate-500">
+        <div className="saas-card p-12 text-center text-slate-400 dark:text-slate-500">
           <RefreshCw size={28} className="animate-spin mx-auto mb-3 text-amber-500" />
           <p className="text-sm font-semibold">Loading shop maintenance logs and service orders...</p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="glass-card p-16 text-center text-slate-400 dark:text-slate-500 max-w-md mx-auto">
+        <div className="saas-card p-16 text-center text-slate-400 dark:text-slate-500 max-w-md mx-auto">
           <Wrench size={40} className="mx-auto mb-3 text-slate-300 dark:text-slate-700" />
           <h3 className="text-base font-bold text-slate-800 dark:text-white">No maintenance tickets found</h3>
           <p className="text-xs mt-1 text-slate-500">
@@ -284,11 +284,11 @@ export default function MaintenancePage() {
           </p>
         </div>
       ) : (
-        <div className="glass-card overflow-hidden">
+        <div className="saas-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                   <th className="py-3.5 px-4 md:px-6">Carrier Vehicle</th>
                   <th className="py-3.5 px-4">Service Details & Task</th>
                   <th className="py-3.5 px-4">Priority Level</th>
@@ -317,7 +317,7 @@ export default function MaintenancePage() {
                         {r.maintenance_type}
                       </p>
                       {r.description && (
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-[220px]">
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-[220px]">
                           {r.description}
                         </p>
                       )}
@@ -347,7 +347,7 @@ export default function MaintenancePage() {
                         {r.status === 'ACTIVE' && (
                           <button
                             onClick={() => closeRecord(r.id)}
-                            className="py-1 px-2.5 rounded-lg text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all inline-flex items-center gap-1"
+                            className="py-1 px-2.5 rounded-lg text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all inline-flex items-center gap-1"
                             title="Mark Shop Service Completed"
                           >
                             <CheckCircle size={13} />

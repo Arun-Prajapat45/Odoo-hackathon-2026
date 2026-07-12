@@ -37,7 +37,7 @@ export default async function FuelExpensesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-teal-900/10 via-emerald-900/10 to-slate-900/5">
+      <div className="saas-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-teal-900/10 via-emerald-900/10 to-slate-900/5">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-600 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/25">
             <Banknote size={24} />
@@ -77,7 +77,7 @@ export default async function FuelExpensesPage() {
       </div>
 
       {/* Footer Total */}
-      <div className="glass-card p-5 mt-6 border-l-4 border-amber-500 bg-amber-50 dark:bg-amber-900/10">
+      <div className="saas-card p-5 mt-6 border-l-4 border-amber-500 bg-amber-50 dark:bg-amber-900/10">
         <div className="flex items-center justify-between">
           <span className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
             Total Operational Cost (Auto) = Fuel + Maint + Other

@@ -26,7 +26,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900/10 via-slate-800/10 to-slate-900/5">
+      <div className="saas-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900/10 via-slate-800/10 to-slate-900/5">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white shadow-lg shadow-slate-500/25">
             <Settings size={24} />
@@ -45,12 +45,12 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* General Settings */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="glass-card p-6">
+          <div className="saas-card p-6">
             <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-5">General</h2>
             
             <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Depot Name</label>
+                <label className="block text-sm font-bold text-slate-500 uppercase tracking-wider mb-1.5">Depot Name</label>
                 <input 
                   type="text" 
                   value={formData.depotName}
@@ -60,7 +60,7 @@ export default function SettingsPage() {
               </div>
               
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Currency</label>
+                <label className="block text-sm font-bold text-slate-500 uppercase tracking-wider mb-1.5">Currency</label>
                 <input 
                   type="text" 
                   value={formData.currency}
@@ -70,7 +70,7 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Distance Unit</label>
+                <label className="block text-sm font-bold text-slate-500 uppercase tracking-wider mb-1.5">Distance Unit</label>
                 <input 
                   type="text" 
                   value={formData.distanceUnit}
@@ -103,7 +103,7 @@ export default function SettingsPage() {
 
         {/* RBAC Matrix */}
         <div className="lg:col-span-8 space-y-6">
-          <div className="glass-card p-6">
+          <div className="saas-card p-6">
             <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-5 flex items-center gap-2">
               <Shield size={16} className="text-blue-500" />
               Role-Based Access (RBAC)
@@ -112,7 +112,7 @@ export default function SettingsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                  <tr className="border-b border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                     <th className="py-3 px-4">Role</th>
                     <th className="py-3 px-4 text-center">Fleet</th>
                     <th className="py-3 px-4 text-center">Drivers</th>

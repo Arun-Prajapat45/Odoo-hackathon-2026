@@ -39,7 +39,7 @@ export default async function DashboardPage() {
       <div className="p-6 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-2xl border border-red-200 dark:border-red-500/20 shadow-sm">
         <h2 className="font-bold text-base text-red-700 dark:text-red-300">Error loading dashboard telemetry</h2>
         <p className="text-sm mt-1 text-red-600/80 dark:text-red-400/80">Could not connect to the database endpoint or query failed.</p>
-        <p className="text-xs mt-2 text-red-500/80 font-mono bg-white/50 dark:bg-black/20 p-2 rounded-lg">{err.message}</p>
+        <p className="text-xs mt-2 text-red-500/80 font-mono bg-white dark:bg-black/20 p-2 rounded-lg">{err.message}</p>
       </div>
     );
   }

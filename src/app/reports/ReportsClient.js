@@ -16,9 +16,9 @@ export default function ReportsClient({ statCards, topCostliestVehicles, monthly
                        card.icon === 'TrendingUp' ? TrendingUp : TrendingDown;
           
           return (
-            <div key={idx} className="glass-card p-5 flex flex-col justify-between">
+            <div key={idx} className="saas-card p-5 flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{card.title}</span>
+                <span className="text-sm font-bold text-slate-400 uppercase tracking-wider">{card.title}</span>
                 <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${card.color.split(' ')[0]} ${card.color.split(' ')[1]} flex items-center justify-center text-white shadow-md`}>
                   <Icon size={16} />
                 </div>
@@ -35,7 +35,7 @@ export default function ReportsClient({ statCards, topCostliestVehicles, monthly
       {/* Analytics Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 w-full">
         {/* Monthly Revenue Chart */}
-        <div className="glass-card p-5 flex flex-col h-[350px]">
+        <div className="saas-card p-5 flex flex-col h-[350px]">
           <div className="mb-4">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Monthly Revenue</h3>
           </div>
@@ -60,10 +60,10 @@ export default function ReportsClient({ statCards, topCostliestVehicles, monthly
         </div>
 
         {/* Top Costliest Vehicles */}
-        <div className="glass-card p-5 flex flex-col h-[350px]">
+        <div className="saas-card p-5 flex flex-col h-[350px]">
           <div className="mb-4">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Top Costliest Vehicles</h3>
-            <p className="text-[10px] text-slate-500 mt-1">Based on fuel and maintenance cost</p>
+            <p className="text-xs text-slate-500 mt-1">Based on fuel and maintenance cost</p>
           </div>
           <div className="flex-1 w-full min-h-0">
             {topCostliestVehicles && topCostliestVehicles.length > 0 ? (

@@ -218,7 +218,7 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
 
   if (loading) {
     return (
-      <div className="glass-card p-16 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+      <div className="saas-card p-16 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
         <RefreshCw size={32} className="animate-spin mb-3 text-blue-500" />
         <p className="text-sm font-semibold">Loading vehicle unit specifications & telemetry...</p>
       </div>
@@ -227,7 +227,7 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
 
   if (error || !vehicle) {
     return (
-      <div className="glass-card p-12 text-center max-w-lg mx-auto">
+      <div className="saas-card p-12 text-center max-w-lg mx-auto">
         <AlertCircle size={44} className="mx-auto mb-3 text-red-500" />
         <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Error Loading Vehicle Unit</h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">{error || 'Vehicle record not found.'}</p>
@@ -281,7 +281,7 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
       </div>
 
       {/* Main Header Banner */}
-      <div className="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-900/10 via-indigo-900/10 to-slate-900/5">
+      <div className="saas-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-900/10 via-indigo-900/10 to-slate-900/5">
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25 shrink-0 mt-1">
             <Truck size={28} />
@@ -336,7 +336,7 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
         {/* Left Columns (Specifications & Status Control) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Status Override Card */}
-          <div className="glass-card p-6">
+          <div className="saas-card p-6">
             <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3.5 flex items-center gap-2">
               <ShieldCheck size={16} className="text-blue-500" />
               <span>Operational Status Manual Override</span>
@@ -365,51 +365,51 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
           </div>
 
           {/* Telemetry & Specifications Card */}
-          <div className="glass-card p-6">
+          <div className="saas-card p-6">
             <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-5">
               Technical Specifications & Telemetry
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-5 gap-x-4">
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Category</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">Category</span>
                 <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">{vehicle.category?.name || vehicle.category_name || 'Standard'}</span>
               </div>
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Load Capacity</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">Load Capacity</span>
                 <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">{Number(vehicle.capacity || 0).toLocaleString()} Tons</span>
               </div>
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Odometer</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">Odometer</span>
                 <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">{Number(vehicle.odometer || 0).toLocaleString()} km</span>
               </div>
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Fuel Type</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">Fuel Type</span>
                 <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block uppercase">{vehicle.fuelType || vehicle.fuel_type || 'DIESEL'}</span>
               </div>
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Manufacturer</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">Manufacturer</span>
                 <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">{vehicle.manufacturer || 'N/A'}</span>
               </div>
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Model & Year</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">Model & Year</span>
                 <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">{vehicle.model || 'N/A'} ({vehicle.year || 'N/A'})</span>
               </div>
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Acquisition Cost</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">Acquisition Cost</span>
                 <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">{vehicle.purchaseCost || vehicle.purchase_cost ? `₹${Number(vehicle.purchaseCost || vehicle.purchase_cost).toLocaleString()}` : 'N/A'}</span>
               </div>
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Current Location</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">Current Location</span>
                 <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">{vehicle.currentLocation || vehicle.current_location || 'Main Depot'}</span>
               </div>
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Insurance Expiry</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">Insurance Expiry</span>
                 <span className={`text-sm font-bold mt-0.5 block ${vehicle.insuranceExpiry && new Date(vehicle.insuranceExpiry) < new Date() ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}>
                   {vehicle.insuranceExpiry || vehicle.insurance_expiry || 'N/A'}
                 </span>
               </div>
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Pollution Expiry</span>
+                <span className="block text-sm font-bold text-slate-400 dark:text-slate-500 uppercase">Pollution Expiry</span>
                 <span className={`text-sm font-bold mt-0.5 block ${vehicle.pollutionExpiry && new Date(vehicle.pollutionExpiry) < new Date() ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}>
                   {vehicle.pollutionExpiry || vehicle.pollution_expiry || 'N/A'}
                 </span>
@@ -418,7 +418,7 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
           </div>
 
           {/* Assigned Trip Telemetry History */}
-          <div className="glass-card overflow-hidden">
+          <div className="saas-card overflow-hidden">
             <div className="p-4 md:p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
               <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 Assigned Trip Telemetry History ({vehicle.trips?.length || 0})
@@ -442,12 +442,12 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
                           <span>{trip.source} → {trip.destination}</span>
                         </span>
                       </div>
-                      <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                      <span className="text-sm text-slate-500 dark:text-slate-400">
                         Cargo Weight: {Number(trip.cargo_weight || trip.cargoWeight || 0).toLocaleString()} Tons
                       </span>
                     </div>
                     <div>
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border uppercase ${getTripStatusStyle(trip.status)}`}>
+                      <span className={`px-2.5 py-1 rounded-full text-sm font-bold border uppercase ${getTripStatusStyle(trip.status)}`}>
                         {trip.status}
                       </span>
                     </div>
@@ -460,7 +460,7 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
 
         {/* Right Column (Compliance Documents & Verification) */}
         <div className="space-y-6">
-          <div className="glass-card p-6 space-y-6">
+          <div className="saas-card p-6 space-y-6">
             <div>
               <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3.5 flex items-center justify-between">
                 <span>Compliance Documents</span>
@@ -509,7 +509,7 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between text-[11px] pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
+                        <div className="flex items-center justify-between text-sm pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
                           <span className="text-slate-500 dark:text-slate-400">
                             Expires: <strong className="text-slate-700 dark:text-slate-300">{doc.expiry_date || doc.expiryDate || 'No expiry'}</strong>
                           </span>

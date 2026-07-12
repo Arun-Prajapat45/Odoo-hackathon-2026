@@ -111,22 +111,22 @@ export default function TripClient({
     <div className="space-y-6">
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-card p-4.5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Draft Orders</span>
+        <div className="saas-card p-4.5">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Draft Orders</span>
           <p className="text-2xl font-extrabold mt-0.5 text-slate-800 dark:text-slate-200">{stats.draft}</p>
           <p className="text-xs font-semibold text-slate-500 mt-1">Pending Dispatch</p>
         </div>
-        <div className="glass-card p-4.5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">In Transit</span>
+        <div className="saas-card p-4.5">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">In Transit</span>
           <p className="text-2xl font-extrabold mt-0.5 text-indigo-600 dark:text-indigo-400">{stats.dispatched}</p>
           <p className="text-xs font-semibold text-slate-500 mt-1">Active Deliveries</p>
         </div>
-        <div className="glass-card p-4.5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Completed</span>
+        <div className="saas-card p-4.5">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Completed</span>
           <p className="text-2xl font-extrabold mt-0.5 text-emerald-600 dark:text-emerald-400">{stats.completed}</p>
           <p className="text-xs font-semibold text-slate-500 mt-1">Successful Trips</p>
         </div>
-        <div className="glass-card p-4.5 flex flex-col justify-center items-end bg-gradient-to-br from-blue-600/10 to-indigo-600/10">
+        <div className="saas-card p-4.5 flex flex-col justify-center items-end bg-gradient-to-br from-blue-600/10 to-indigo-600/10">
           <button
             onClick={() => { setIsModalOpen(true); setError(''); }}
             className="btn-primary w-full py-2.5 justify-center text-xs font-bold shadow-lg shadow-blue-500/20"
@@ -138,7 +138,7 @@ export default function TripClient({
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="glass-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="saas-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
           <input
@@ -168,11 +168,11 @@ export default function TripClient({
       </div>
 
       {/* Trips Table */}
-      <div className="glass-card overflow-hidden">
+      <div className="saas-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 <th className="py-3.5 px-4 md:px-6">Trip Manifest #</th>
                 <th className="py-3.5 px-4">Assigned Vehicle</th>
                 <th className="py-3.5 px-4">Operator / Driver</th>
@@ -191,7 +191,7 @@ export default function TripClient({
                       <span className="text-blue-600 dark:text-blue-400">
                         {trip.trip_number || `TRIP-${trip.id}`}
                       </span>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
+                      <p className="text-xs text-slate-400 mt-0.5">
                         {trip.created_at ? trip.created_at.split('T')[0] : 'Active Order'}
                       </p>
                     </td>
@@ -205,7 +205,7 @@ export default function TripClient({
                       ) : (
                         <span className="text-xs text-slate-400">No Vehicle Assigned</span>
                       )}
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-[140px]">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-[140px]">
                         {trip.vehicle_name || 'Standard Carrier'}
                       </p>
                     </td>
@@ -226,11 +226,11 @@ export default function TripClient({
                     </td>
 
                     <td className="py-4 px-4 font-bold text-xs text-slate-800 dark:text-slate-200">
-                      {Number(trip.cargo_weight || 0).toLocaleString()} <span className="text-[10px] text-slate-400 font-normal">Tons</span>
+                      {Number(trip.cargo_weight || 0).toLocaleString()} <span className="text-xs text-slate-400 font-normal">Tons</span>
                     </td>
 
                     <td className="py-4 px-4">
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border uppercase inline-flex items-center gap-1 ${getStatusStyle(trip.status)}`}>
+                      <span className={`px-2.5 py-1 rounded-full text-sm font-bold border uppercase inline-flex items-center gap-1 ${getStatusStyle(trip.status)}`}>
                         {isProcessing && <Loader2 size={11} className="animate-spin" />}
                         <span>{trip.status}</span>
                       </span>
@@ -242,7 +242,7 @@ export default function TripClient({
                           <button
                             onClick={() => handleDispatch(trip)}
                             disabled={isProcessing}
-                            className="btn-primary py-1 px-2.5 text-[11px] bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700"
+                            className="btn-primary py-1 px-2.5 text-sm bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700"
                             title="Dispatch Trip Order"
                           >
                             <Play size={12} fill="currentColor" />
@@ -253,7 +253,7 @@ export default function TripClient({
                           <button
                             onClick={() => handleComplete(trip)}
                             disabled={isProcessing}
-                            className="py-1 px-2.5 rounded-lg text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all inline-flex items-center gap-1"
+                            className="py-1 px-2.5 rounded-lg text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all inline-flex items-center gap-1"
                             title="Complete Trip Delivery"
                           >
                             <CheckCircle size={13} />

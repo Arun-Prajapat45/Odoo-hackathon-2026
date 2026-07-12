@@ -136,7 +136,7 @@ export default function UsersPage() {
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-900/10 via-indigo-900/10 to-purple-900/10">
+      <div className="saas-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-900/10 via-indigo-900/10 to-purple-900/10">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25">
             <Users size={24} />
@@ -174,7 +174,7 @@ export default function UsersPage() {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="glass-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="saas-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -201,7 +201,7 @@ export default function UsersPage() {
                 }`}
               >
                 <span>{r}</span>
-                <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] ${
+                <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-xs ${
                   isActive ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'
                 }`}>
                   {count}
@@ -214,12 +214,12 @@ export default function UsersPage() {
 
       {/* Users Table / Grid */}
       {loading ? (
-        <div className="glass-card p-12 text-center text-slate-400 dark:text-slate-500">
+        <div className="saas-card p-12 text-center text-slate-400 dark:text-slate-500">
           <RefreshCw size={28} className="animate-spin mx-auto mb-3 text-blue-500" />
           <p className="text-sm font-semibold">Loading enterprise personnel directory...</p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="glass-card p-16 text-center text-slate-400 dark:text-slate-500 max-w-md mx-auto">
+        <div className="saas-card p-16 text-center text-slate-400 dark:text-slate-500 max-w-md mx-auto">
           <Shield size={40} className="mx-auto mb-3 text-slate-300 dark:text-slate-700" />
           <h3 className="text-base font-bold text-slate-800 dark:text-white">No users match your criteria</h3>
           <p className="text-xs mt-1 text-slate-500">
@@ -227,11 +227,11 @@ export default function UsersPage() {
           </p>
         </div>
       ) : (
-        <div className="glass-card overflow-hidden">
+        <div className="saas-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                   <th className="py-3 px-4 md:px-6">Personnel</th>
                   <th className="py-3 px-4">Assigned Role</th>
                   <th className="py-3 px-4">Status</th>

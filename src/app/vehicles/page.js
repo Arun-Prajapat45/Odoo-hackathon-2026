@@ -125,7 +125,7 @@ export default function VehiclesPage() {
   return (
     <div className="space-y-6">
       {/* Top Header Banner */}
-      <div className="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-900/10 via-indigo-900/10 to-slate-900/5">
+      <div className="saas-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-900/10 via-indigo-900/10 to-slate-900/5">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25">
             <Truck size={24} />
@@ -170,7 +170,7 @@ export default function VehiclesPage() {
       )}
 
       {/* Filter Tabs by Category */}
-      <div className="glass-card p-4 space-y-3">
+      <div className="saas-card p-4 space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
             <button
@@ -203,7 +203,7 @@ export default function VehiclesPage() {
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all uppercase ${
+                className={`px-3 py-1 rounded-lg text-sm font-bold transition-all uppercase ${
                   statusFilter === st
                     ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
                     : 'bg-slate-50 dark:bg-slate-800/60 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -230,12 +230,12 @@ export default function VehiclesPage() {
 
       {/* Vehicles Table / Grid */}
       {loading ? (
-        <div className="glass-card p-12 text-center text-slate-400 dark:text-slate-500">
+        <div className="saas-card p-12 text-center text-slate-400 dark:text-slate-500">
           <RefreshCw size={28} className="animate-spin mx-auto mb-3 text-blue-500" />
           <p className="text-sm font-semibold">Loading vehicle registry...</p>
         </div>
       ) : vehicles.length === 0 ? (
-        <div className="glass-card p-16 text-center text-slate-400 dark:text-slate-500 max-w-md mx-auto">
+        <div className="saas-card p-16 text-center text-slate-400 dark:text-slate-500 max-w-md mx-auto">
           <Truck size={40} className="mx-auto mb-3 text-slate-300 dark:text-slate-700" />
           <h3 className="text-base font-bold text-slate-800 dark:text-white">No registered vehicles found</h3>
           <p className="text-xs mt-1 text-slate-500">
@@ -245,11 +245,11 @@ export default function VehiclesPage() {
           </p>
         </div>
       ) : (
-        <div className="glass-card overflow-hidden">
+        <div className="saas-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                   <th className="py-3 px-4 md:px-6">Vehicle Unit</th>
                   <th className="py-3 px-4">Category & Model</th>
                   <th className="py-3 px-4">Capacity / Odometer</th>
@@ -281,7 +281,7 @@ export default function VehiclesPage() {
                       <p className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
                         {v.category_name || categories.find(c => c.id === (v.category_id || v.categoryId))?.name || 'Standard Unit'}
                       </p>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                         {v.manufacturer || 'Generic'} • {v.model || 'Model'} ({v.year || 'N/A'})
                       </p>
                     </td>
@@ -290,7 +290,7 @@ export default function VehiclesPage() {
                       <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
                         {v.capacity ? `${v.capacity} Tons` : '—'}
                       </p>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                         {v.odometer ? `${Number(v.odometer).toLocaleString()} km` : '0 km'}
                       </p>
                     </td>
@@ -300,7 +300,7 @@ export default function VehiclesPage() {
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase">
+                      <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-sm font-bold text-slate-600 dark:text-slate-300 uppercase">
                         {v.fuel_type || v.fuelType || 'DIESEL'}
                       </span>
                     </td>

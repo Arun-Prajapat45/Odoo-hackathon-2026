@@ -154,7 +154,7 @@ export default function AiAssistantPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-6rem)] gap-4">
       {/* Top Banner */}
-      <div className="glass-card p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-900/10 via-indigo-900/10 to-purple-900/10 border-indigo-500/20">
+      <div className="saas-card p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-900/10 via-indigo-900/10 to-purple-900/10 border-indigo-500/20">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
             <Sparkles size={24} className="animate-pulse" />
@@ -211,7 +211,7 @@ export default function AiAssistantPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-1">
-                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                  <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                     {qp.badge}
                   </span>
                   <span className="text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity font-medium">
@@ -228,7 +228,7 @@ export default function AiAssistantPage() {
       </div>
 
       {/* Main Chat Box */}
-      <div className="glass-card flex-1 flex flex-col overflow-hidden min-h-[300px]">
+      <div className="saas-card flex-1 flex flex-col overflow-hidden min-h-[300px]">
         {/* Chat Messages Feed */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5">
           {loading ? (
@@ -268,11 +268,11 @@ export default function AiAssistantPage() {
                     }`}
                   >
                     <div className="flex items-center justify-between gap-4 mb-2 pb-1.5 border-b border-black/5 dark:border-white/10">
-                      <span className="text-[11px] font-bold tracking-wide uppercase opacity-80">
+                      <span className="text-sm font-bold tracking-wide uppercase opacity-80">
                         {isAssistant ? 'TransitOps Telemetry AI' : 'You'}
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] opacity-60">
+                        <span className="text-xs opacity-60">
                           {m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                         </span>
                         {isAssistant && (

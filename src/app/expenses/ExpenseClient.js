@@ -45,30 +45,30 @@ export default function ExpenseClient({ initialLogs = [], vehicles = [], createA
     <div className="space-y-6">
       {/* KPI Breakdown Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-card p-4.5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Expenditure</span>
+        <div className="saas-card p-4.5">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Expenditure</span>
           <p className="text-2xl font-extrabold mt-0.5 text-slate-900 dark:text-white">₹{totalExpense.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           <p className="text-xs font-semibold text-slate-500 mt-1">All Operational Costs</p>
         </div>
-        <div className="glass-card p-4.5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tolls & Highway</span>
+        <div className="saas-card p-4.5">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Tolls & Highway</span>
           <p className="text-2xl font-extrabold mt-0.5 text-amber-600 dark:text-amber-400">₹{tollExpense.toLocaleString()}</p>
           <p className="text-xs font-semibold text-slate-500 mt-1">FASTag / Toll Pass</p>
         </div>
-        <div className="glass-card p-4.5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Maintenance & Parts</span>
+        <div className="saas-card p-4.5">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Maintenance & Parts</span>
           <p className="text-2xl font-extrabold mt-0.5 text-blue-600 dark:text-blue-400">₹{maintExpense.toLocaleString()}</p>
           <p className="text-xs font-semibold text-slate-500 mt-1">Service Shop Outlay</p>
         </div>
-        <div className="glass-card p-4.5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Permits & Misc</span>
+        <div className="saas-card p-4.5">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Permits & Misc</span>
           <p className="text-2xl font-extrabold mt-0.5 text-purple-600 dark:text-purple-400">₹{miscExpense.toLocaleString()}</p>
           <p className="text-xs font-semibold text-slate-500 mt-1">Compliance & Sundries</p>
         </div>
       </div>
 
       {/* Filter & Action Bar */}
-      <div className="glass-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="saas-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
           <input
@@ -104,11 +104,11 @@ export default function ExpenseClient({ initialLogs = [], vehicles = [], createA
       </div>
 
       {/* Expenses Table */}
-      <div className="glass-card overflow-hidden">
+      <div className="saas-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 <th className="py-3.5 px-4 md:px-6">Log Date</th>
                 <th className="py-3.5 px-4">Carrier Vehicle</th>
                 <th className="py-3.5 px-4">Category Type</th>
@@ -133,13 +133,13 @@ export default function ExpenseClient({ initialLogs = [], vehicles = [], createA
                     ) : (
                       <span className="text-xs text-slate-400 font-mono">{log.registration_number || 'General Fleet'}</span>
                     )}
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                       {log.vehicle_name || 'Assigned Carrier'}
                     </p>
                   </td>
 
                   <td className="py-4 px-4">
-                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border uppercase inline-block ${getTypeStyle(log.type)}`}>
+                    <span className={`px-2.5 py-1 rounded-full text-sm font-bold border uppercase inline-block ${getTypeStyle(log.type)}`}>
                       {log.type}
                     </span>
                   </td>

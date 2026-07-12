@@ -294,8 +294,8 @@ export default function UsersPage() {
                         </button>
                       </td>
 
-                      <td className="py-3.5 px-4 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                        {u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}
+                      <td className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        {u.created_at ? u.created_at.split('T')[0] : '—'}
                       </td>
 
                       <td className="py-3.5 px-4 md:px-6 text-right">

@@ -2,16 +2,17 @@ import React from 'react';
 import { queryDb, safeQuery } from '@/lib/db';
 import { BarChart3, Download, TrendingUp, TrendingDown, DollarSign, Activity, PieChart, ArrowUpRight, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import ReportsClient from './ReportsClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ReportsPage() {
   const [vehiclesRes, fuelRes, maintRes, expRes, tripRes] = await Promise.all([
-    safeQuery('SELECT id, status, purchase_cost FROM vehicle', [], []),
-    safeQuery('SELECT liters, total_cost, odometer FROM fuel_log', [], []),
-    safeQuery('SELECT cost FROM maintenance', [], []),
+    safeQuery('SELECT id, registration_number, vehicle_name, status, purchase_cost FROM vehicle', [], []),
+    safeQuery('SELECT vehicle_id, liters, total_cost, odometer FROM fuel_log', [], []),
+    safeQuery('SELECT vehicle_id, cost FROM maintenance', [], []),
     safeQuery('SELECT amount FROM expense', [], []),
-    safeQuery("SELECT actual_distance, revenue FROM trip WHERE status = 'COMPLETED'", [], []),
+    safeQuery("SELECT actual_distance, revenue, actual_end FROM trip WHERE status = 'COMPLETED'", [], []),
   ]);
 
   const vehicles = vehiclesRes || [];
@@ -39,33 +40,61 @@ export default async function ReportsPage() {
   const profit = totalRevenue - operationalCost;
   const vehicleROI = totalAcquisitionCost > 0 ? ((profit / totalAcquisitionCost) * 100).toFixed(2) : 0;
 
+  // Analytics Calculations
+  const vehicleCosts = {};
+  vehicles.forEach(v => {
+    vehicleCosts[v.id] = { name: v.registration_number || `Vehicle ${v.id}`, cost: 0 };
+  });
+  fuelLogs.forEach(f => {
+    if (f.vehicle_id && vehicleCosts[f.vehicle_id]) vehicleCosts[f.vehicle_id].cost += (f.total_cost || 0);
+  });
+  maintenances.forEach(m => {
+    if (m.vehicle_id && vehicleCosts[m.vehicle_id]) vehicleCosts[m.vehicle_id].cost += (m.cost || 0);
+  });
+  const topCostliestVehicles = Object.values(vehicleCosts)
+    .sort((a, b) => b.cost - a.cost)
+    .slice(0, 3);
+
+  const monthlyRevenue = {};
+  trips.forEach(t => {
+    if (t.actual_end) {
+      const d = new Date(t.actual_end);
+      const month = d.toLocaleString('default', { month: 'short' });
+      monthlyRevenue[month] = (monthlyRevenue[month] || 0) + (t.revenue || 0);
+    }
+  });
+  const monthlyRevenueData = Object.keys(monthlyRevenue).map(month => ({
+    month,
+    revenue: monthlyRevenue[month]
+  }));
+
   const statCards = [
     {
       title: 'Fleet Operational Utilization',
       value: `${utilization}%`,
       sub: `${activeVehicles} of ${totalVehicles} units active & available`,
-      icon: Activity,
+      icon: 'Activity',
       color: 'from-blue-600 to-indigo-600 text-blue-600 dark:text-blue-400'
     },
     {
       title: 'Total Operational Outlay',
       value: `₹${operationalCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
       sub: 'Cumulative fuel, maintenance & toll vouchers',
-      icon: DollarSign,
+      icon: 'DollarSign',
       color: 'from-amber-500 to-orange-600 text-amber-600 dark:text-amber-400'
     },
     {
       title: 'Fleet Fuel Efficiency',
       value: `${fuelEfficiency} km/L`,
       sub: `Across ${totalDistance.toLocaleString()} km traversed distance`,
-      icon: BarChart3,
+      icon: 'BarChart3',
       color: 'from-purple-600 to-pink-600 text-purple-600 dark:text-purple-400'
     },
     {
       title: 'Net Fleet Capital ROI',
       value: `${vehicleROI}%`,
       sub: `On ₹${totalAcquisitionCost.toLocaleString()} acquisition basis`,
-      icon: profit >= 0 ? TrendingUp : TrendingDown,
+      icon: profit >= 0 ? 'TrendingUp' : 'TrendingDown',
       color: profit >= 0 ? 'from-emerald-600 to-teal-600 text-emerald-600 dark:text-emerald-400' : 'from-red-600 to-rose-600 text-red-600 dark:text-red-400'
     }
   ];
@@ -101,26 +130,11 @@ export default async function ReportsPage() {
         </Link>
       </div>
 
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((card, idx) => {
-          const Icon = card.icon;
-          return (
-            <div key={idx} className="glass-card p-5 flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{card.title}</span>
-                <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${card.color.split(' ')[0]} ${card.color.split(' ')[1]} flex items-center justify-center text-white shadow-md`}>
-                  <Icon size={16} />
-                </div>
-              </div>
-              <div className="mt-4">
-                <p className={`text-3xl font-extrabold ${card.color.split(' ').slice(2).join(' ')}`}>{card.value}</p>
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">{card.sub}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <ReportsClient 
+        statCards={statCards} 
+        topCostliestVehicles={topCostliestVehicles} 
+        monthlyRevenueData={monthlyRevenueData} 
+      />
 
       {/* Financial Breakdown Table */}
       <div className="glass-card overflow-hidden">

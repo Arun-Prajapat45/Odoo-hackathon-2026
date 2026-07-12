@@ -20,7 +20,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   Info,
-  ExternalLink
+  ExternalLink,
+  Settings
 } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import LogoutButton from './LogoutButton';
@@ -89,11 +90,10 @@ export default function AppNavigation({ user, children }) {
     { name: 'Drivers', href: '/drivers', icon: Users },
     { name: 'Trips & Dispatch', href: '/trips', icon: Map },
     { name: 'Maintenance', href: '/maintenance', icon: Wrench },
-    { name: 'Fuel Logs', href: '/fuel', icon: Fuel },
-    { name: 'Expenses', href: '/expenses', icon: Receipt },
+    { name: 'Fuel & Expenses', href: '/fuel-expenses', icon: Receipt },
     { name: 'Reports', href: '/reports', icon: BarChart3 },
     { name: 'Notifications', href: '/notifications', icon: Bell, badge: unreadNotifs.length },
-    { name: 'User Management', href: '/users', icon: Users, roles: ['Admin', 'Fleet Manager'] },
+    { name: 'Settings', href: '/settings', icon: Settings, roles: ['Admin', 'Fleet Manager'] },
   ];
 
   const filteredLinks = navLinks.filter(link => {
@@ -123,14 +123,14 @@ export default function AppNavigation({ user, children }) {
             key={link.href}
             href={link.href}
             onClick={onItemClick}
-            className={`group flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 ${
+            className={`group flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 ${
               isActive
                 ? link.highlight
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 font-semibold'
-                  : 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 font-semibold'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.4)] font-bold'
+                  : 'bg-white/60 dark:bg-white/10 text-slate-900 dark:text-white font-bold shadow-sm border border-slate-200/50 dark:border-white/10 backdrop-blur-md'
                 : link.highlight
                 ? 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/5'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -140,7 +140,7 @@ export default function AppNavigation({ user, children }) {
                   isActive
                     ? link.highlight
                       ? 'text-white'
-                      : 'text-blue-600 dark:text-blue-400'
+                      : 'text-slate-900 dark:text-white'
                     : link.highlight
                     ? 'text-indigo-500'
                     : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'
@@ -160,11 +160,11 @@ export default function AppNavigation({ user, children }) {
   );
 
   return (
-    <div className="flex h-screen w-full flex-1 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden transition-colors duration-200">
+    <div className="flex h-screen w-full flex-1 bg-transparent text-slate-900 dark:text-slate-100 overflow-hidden transition-colors duration-200">
       {/* ── Desktop Sidebar ── */}
-      <aside className="w-[260px] flex-shrink-0 hidden md:flex flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800/80 transition-colors">
+      <aside className="w-[260px] flex-shrink-0 hidden md:flex flex-col bg-white/50 dark:bg-black/30 backdrop-blur-2xl border-r border-slate-200/50 dark:border-white/10 transition-colors z-40">
         {/* Logo */}
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800/80">
+        <div className="px-6 py-5 border-b border-slate-200/50 dark:border-white/10">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
               <Truck size={20} className="text-white" />
@@ -184,9 +184,9 @@ export default function AppNavigation({ user, children }) {
         {renderNavList()}
 
         {/* User Profile Card */}
-        <div className="p-3.5 border-t border-slate-200 dark:border-slate-800/80 mt-auto bg-slate-50/80 dark:bg-slate-900/80 space-y-2.5">
-          <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow shrink-0">
+        <div className="p-3.5 border-t border-slate-200/50 dark:border-white/10 mt-auto bg-transparent space-y-2.5">
+          <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-white/60 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 shadow-sm backdrop-blur-md overflow-hidden">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-800 to-black dark:from-white dark:to-slate-200 flex items-center justify-center text-xs font-bold text-white dark:text-black shadow shrink-0">
               {user.name?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
@@ -243,9 +243,9 @@ export default function AppNavigation({ user, children }) {
       )}
 
       {/* ── Main Layout Area ── */}
-      <main className="flex-1 flex flex-col overflow-hidden min-w-0">
+      <main className="flex-1 flex flex-col overflow-hidden min-w-0 z-10">
         {/* Top Header */}
-        <header className="h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between px-4 md:px-8 shrink-0 z-30 transition-colors">
+        <header className="h-16 bg-white/40 dark:bg-black/20 backdrop-blur-2xl border-b border-slate-200/50 dark:border-white/10 flex items-center justify-between px-4 md:px-8 shrink-0 z-30 transition-colors">
           <div className="flex items-center gap-3">
             {/* Mobile Menu Trigger */}
             <button
@@ -380,8 +380,8 @@ export default function AppNavigation({ user, children }) {
             <ThemeToggle />
 
             {/* User Avatar Chip (Desktop) */}
-            <div className="hidden md:flex items-center gap-2.5 pl-3 border-l border-slate-200 dark:border-slate-800">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow-sm">
+            <div className="hidden md:flex items-center gap-2.5 pl-3 border-l border-slate-200/50 dark:border-white/10">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-800 to-black dark:from-white dark:to-slate-200 flex items-center justify-center text-xs font-bold text-white dark:text-black shadow-sm">
                 {user.name?.charAt(0).toUpperCase()}
               </div>
               <div className="text-left">
@@ -393,8 +393,8 @@ export default function AppNavigation({ user, children }) {
         </header>
 
         {/* Page Content Viewport */}
-        <div className="flex-1 overflow-y-auto w-full bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
-          <div className="p-4 md:p-8 max-w-[1800px] w-full mx-auto min-h-full flex flex-col">
+        <div className="flex-1 overflow-y-auto w-full bg-transparent transition-colors duration-200 relative">
+          <div className="p-4 md:p-8 max-w-[1800px] w-full mx-auto min-h-full flex flex-col z-10 relative">
             {children}
           </div>
         </div>

@@ -191,9 +191,12 @@ export default function DriverDetailPage({ params: paramsPromise }) {
       </div>
 
       {/* Driver Header Card */}
-      <div className="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-emerald-900/10 via-blue-900/10 to-slate-900/5">
-        <div className="flex items-start gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center text-xl font-extrabold text-white shadow-lg shadow-emerald-500/25 shrink-0">
+      <div className="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative overflow-hidden">
+        {/* Decorative glow */}
+        <div className="absolute -top-12 -left-12 w-32 h-32 bg-blue-500/20 blur-3xl rounded-full pointer-events-none" />
+        
+        <div className="flex items-start gap-4 z-10">
+          <div className="w-16 h-16 rounded-2xl bg-slate-900 dark:bg-white flex items-center justify-center text-xl font-extrabold text-white dark:text-slate-900 shadow-xl shrink-0">
             {driver.name?.charAt(0).toUpperCase()}
           </div>
           <div>
@@ -263,12 +266,12 @@ export default function DriverDetailPage({ params: paramsPromise }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {/* Driver License & Credentials Card */}
-          <div className="glass-card p-6">
+          <div className="glass-card p-6 relative overflow-hidden">
             <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-5 flex items-center justify-between">
               <span>Driver Credentials & Telemetry Details</span>
-              <span className="text-emerald-600 dark:text-emerald-400 font-bold">{driver.license_type || 'HMV'} Category</span>
+              <span className="text-blue-600 dark:text-blue-400 font-bold">{driver.license_type || 'HMV'} Category</span>
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-5 gap-x-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-6 gap-x-4">
               <div>
                 <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">License Number</span>
                 <span className="text-sm font-mono font-bold text-slate-900 dark:text-white mt-0.5 block">{driver.license_number || '—'}</span>
@@ -300,8 +303,8 @@ export default function DriverDetailPage({ params: paramsPromise }) {
           </div>
 
           {/* Assigned Trip Manifests */}
-          <div className="glass-card overflow-hidden">
-            <div className="p-4 md:p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
+          <div className="glass-card overflow-hidden mt-6">
+            <div className="p-4 md:p-5 border-b border-slate-200/50 dark:border-white/10 bg-transparent flex items-center justify-between">
               <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 Dispatched Trip History ({driver.trips?.length || 0})
               </h2>

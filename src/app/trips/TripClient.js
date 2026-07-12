@@ -192,7 +192,7 @@ export default function TripClient({
                         {trip.trip_number || `TRIP-${trip.id}`}
                       </span>
                       <p className="text-[10px] text-slate-400 mt-0.5">
-                        {trip.created_at ? new Date(trip.created_at).toLocaleDateString() : 'Active Order'}
+                        {trip.created_at ? trip.created_at.split('T')[0] : 'Active Order'}
                       </p>
                     </td>
 

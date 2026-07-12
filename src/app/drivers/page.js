@@ -178,6 +178,9 @@ export default function DriversPage() {
               <tbody>
                 {filtered.map((d) => {
                   const days = daysUntilExpiry(d.license_expiry);
+                  const isExpired = days < 0;
+                  const isExpiringSoon = days >= 0 && days <= 30;
+                  
                   return (
                     <tr key={d.id}>
                       <td className="text-orange">
@@ -190,8 +193,8 @@ export default function DriversPage() {
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                           <span className="text-mono">{d.license_expiry}</span>
-                          <span className={`badge ${days <= 30 ? 'badge-expired' : 'badge-valid'}`}>
-                            {days <= 30 ? '⊗ EXPIRED' : '✓ VALID'}
+                          <span className={`badge ${isExpired ? 'badge-expired' : isExpiringSoon ? 'badge-warning' : 'badge-valid'}`}>
+                            {isExpired ? '⊗ EXPIRED' : isExpiringSoon ? '⚠ EXPIRING' : '✓ VALID'}
                           </span>
                         </div>
                       </td>

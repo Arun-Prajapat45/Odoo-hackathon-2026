@@ -327,7 +327,7 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
       {hasActiveTrip && (
         <div className="p-4 rounded-xl flex items-start gap-3 bg-amber-500/10 border border-amber-500/20 text-amber-400">
           <AlertTriangle className="mt-0.5 shrink-0" size={18} />
-          <span>This vehicle is locked and cannot be deleted because it is assigned to an active trip ({activeTrips[0].tripNumber} - {activeTrips[0].status}).</span>
+          <span>This vehicle is locked and cannot be deleted because it is assigned to an active trip ({activeTrips[0].trip_number || activeTrips[0].tripNumber || activeTrips[0].id} - {activeTrips[0].status}).</span>
         </div>
       )}
 
@@ -336,7 +336,7 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
         {/* Left Side details */}
         <div className="lg:col-span-2 space-y-6">
           {/* Metadata Card */}
-          <div className="bg-slate-900 rounded-xl border border-slate-800/60 p-6 shadow-sm">
+          <div className="bg-slate-800/40 rounded-xl border border-slate-700/60 p-6 shadow-md backdrop-blur-sm">
             <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-5">Vehicle Telemetry & Specifications</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-4">
               <div>
@@ -391,7 +391,7 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
           </div>
 
           {/* Quick Status Control Switcher */}
-          <div className="bg-slate-900 rounded-xl border border-slate-800/60 p-6 shadow-sm">
+          <div className="bg-slate-800/40 rounded-xl border border-slate-700/60 p-6 shadow-md backdrop-blur-sm">
             <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Set Vehicle Status (Manual override)</h2>
             <div className="flex flex-wrap gap-3">
               {['AVAILABLE', 'ON_TRIP', 'IN_SHOP', 'RETIRED'].map((st) => {
@@ -422,23 +422,23 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
           </div>
 
           {/* Trip History Log */}
-          <div className="bg-slate-900 rounded-xl border border-slate-800/60 p-0 overflow-hidden shadow-sm">
-            <div className="p-4 border-b border-slate-800/60">
+          <div className="bg-slate-800/40 rounded-xl border border-slate-700/60 p-0 overflow-hidden shadow-md backdrop-blur-sm">
+            <div className="p-4 border-b border-slate-700/60">
               <h2 className="text-sm font-semibold text-white uppercase tracking-wider">Assigned Trip Telemetry History</h2>
             </div>
             {(!vehicle.trips || vehicle.trips.length === 0) ? (
-              <p className="p-8 text-sm text-slate-500 text-center">No trips registered for this vehicle.</p>
+              <p className="p-8 text-sm text-slate-400 text-center">No trips registered for this vehicle.</p>
             ) : (
-              <div className="divide-y divide-slate-800/60">
+              <div className="divide-y divide-slate-700/60">
                 {vehicle.trips.map((trip) => (
-                  <div key={trip.id} className="p-4 hover:bg-white/[0.02] transition-colors flex items-center justify-between gap-4 flex-wrap">
+                  <div key={trip.id} className="p-4 hover:bg-slate-700/30 transition-colors flex items-center justify-between gap-4 flex-wrap">
                     <div>
                       <div className="flex items-center gap-3 mb-1">
-                        <span className="font-mono text-sm font-medium text-white">{trip.tripNumber}</span>
-                        <span className="text-sm text-slate-300 flex items-center gap-1"><MapPin size={14} className="text-slate-500"/> {trip.source} → {trip.destination}</span>
+                        <span className="font-mono text-sm font-bold text-white">{trip.trip_number || trip.tripNumber || `TRIP-${trip.id}`}</span>
+                        <span className="text-sm text-slate-300 flex items-center gap-1"><MapPin size={14} className="text-slate-400"/> {trip.source} → {trip.destination}</span>
                       </div>
-                      <span className="text-xs text-slate-500">
-                        Cargo Weight: {trip.cargoWeight} kg
+                      <span className="text-xs text-slate-400">
+                        Cargo Weight: {trip.cargo_weight || trip.cargoWeight || 0} kg
                       </span>
                     </div>
                     <div>
@@ -456,21 +456,21 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
         {/* Right Side compliance documents */}
         <div className="space-y-6">
           {/* Document upload card */}
-          <div className="bg-slate-900 rounded-xl border border-slate-800/60 p-6 shadow-sm">
+          <div className="bg-slate-800/40 rounded-xl border border-slate-700/60 p-6 shadow-md backdrop-blur-sm">
             <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Compliance Documents</h2>
             
             {/* List of uploaded documents */}
             {(!vehicle.documents || vehicle.documents.length === 0) ? (
-              <p className="text-sm text-slate-500 mb-6 pb-6 border-b border-slate-800/60">No compliance documents registered.</p>
+              <p className="text-sm text-slate-400 mb-6 pb-6 border-b border-slate-700/60">No compliance documents registered.</p>
             ) : (
-              <div className="space-y-3 mb-6 pb-6 border-b border-slate-800/60">
+              <div className="space-y-3 mb-6 pb-6 border-b border-slate-700/60">
                 {vehicle.documents.map((doc) => (
-                  <div key={doc.id} className="bg-slate-800/50 border border-slate-700/50 p-3 rounded-lg flex flex-col gap-2 transition-colors hover:bg-slate-800">
+                  <div key={doc.id} className="bg-slate-900/80 border border-slate-700 p-3 rounded-lg flex flex-col gap-2 transition-colors hover:bg-slate-800">
                     <div className="flex justify-between items-start">
-                      <span className="text-sm font-medium text-white">{doc.documentType}</span>
+                      <span className="text-sm font-medium text-white">{doc.document_type || doc.documentType}</span>
                       <div className="flex gap-2">
                         <a 
-                          href={doc.documentUrl} 
+                          href={doc.document_url || doc.documentUrl || '#'} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="text-slate-400 hover:text-blue-400 transition-colors p-1"
@@ -490,10 +490,10 @@ export default function VehicleDetailsPage({ params: paramsPromise }) {
                     
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-slate-400">
-                        Expires: {doc.expiryDate || 'No expiry'}
+                        Expires: {doc.expiry_date || doc.expiryDate || 'No expiry'}
                       </span>
                       
-                      {doc.verified ? (
+                      {doc.verified || doc.is_verified ? (
                         <button 
                           onClick={() => handleToggleDocVerification(doc.id, true)}
                           className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors" 

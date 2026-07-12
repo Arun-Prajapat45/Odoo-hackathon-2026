@@ -1,0 +1,58 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model VehicleCategory {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  vehicles Vehicle[]
+}
+
+model Vehicle {
+  id                 Int               @id @default(autoincrement())
+  registrationNumber String            @unique
+  vehicleName        String
+  categoryId         Int
+  category           VehicleCategory   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  manufacturer       String?
+  model              String?
+  year               Int?
+  capacity           Float             // max load, kg
+  odometer           Float             @default(0)
+  fuelType           String            // PETROL, DIESEL, CNG, EV
+  purchaseCost       Float             @default(0)
+  status             String            @default("AVAILABLE") // AVAILABLE, ON_TRIP, IN_SHOP, RETIRED
+  currentLocation    String?
+  insuranceExpiry    String?           // YYYY-MM-DD
+  pollutionExpiry    String?           // YYYY-MM-DD
+  createdAt          DateTime          @default(now())
+  documents          VehicleDocument[]
+  trips              Trip[]
+}
+
+model VehicleDocument {
+  id           Int      @id @default(autoincrement())
+  vehicleId    Int
+  vehicle      Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  documentType String   // e.g. Insurance, RC, Pollution, Permit
+  documentUrl  String
+  expiryDate   String?  // YYYY-MM-DD
+  verified     Boolean  @default(false)
+}
+
+model Trip {
+  id          Int      @id @default(autoincrement())
+  tripNumber  String   @unique
+  vehicleId   Int
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+  status      String   @default("DRAFT") // DRAFT, DISPATCHED, COMPLETED, CANCELLED
+  cargoWeight Float
+  source      String
+  destination String
+  createdAt   DateTime @default(now())
+}

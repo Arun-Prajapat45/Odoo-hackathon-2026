@@ -1,0 +1,256 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.back-link:hover {
+  color: var(--primary);
+}
+
+.layout-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.75rem;
+}
+
+.info-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.info-value {
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.status-widget {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.status-btn {
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+}
+
+.status-btn:hover {
+  background-color: var(--bg-secondary);
+}
+
+.status-btn-active-AVAILABLE {
+  background-color: var(--success-light);
+  color: var(--success);
+  border-color: var(--success-border);
+}
+.status-btn-active-ON_TRIP {
+  background-color: var(--info-light);
+  color: var(--info);
+  border-color: var(--info-border);
+}
+.status-btn-active-IN_SHOP {
+  background-color: var(--warning-light);
+  color: var(--warning);
+  border-color: var(--warning-border);
+}
+.status-btn-active-RETIRED {
+  background-color: var(--danger-light);
+  color: var(--danger);
+  border-color: var(--danger-border);
+}
+
+/* Documents section */
+.doc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.doc-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background-color: var(--bg-primary);
+}
+
+.doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.doc-type {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.doc-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.doc-action-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.doc-action-icon:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.doc-action-icon-delete:hover {
+  color: var(--danger);
+  background-color: var(--danger-light);
+}
+
+.doc-meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.verified-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.unverified-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.unverified-indicator:hover {
+  color: var(--primary);
+}
+
+/* Upload widget */
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  margin-top: 1rem;
+}
+
+/* Trip log list */
+.trip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.trip-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.875rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--bg-primary);
+}
+
+.trip-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.trip-number {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.trip-routes {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+/* Active trip banner */
+.active-warning-banner {
+  background-color: var(--danger-light);
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
+  padding: 0.875rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}

@@ -1,6 +1,6 @@
 "use server";
 
-import { executeQuery } from '../../lib/db';
+import { queryDb } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
 export async function createTrip(formData) {
@@ -17,41 +17,41 @@ export async function createTrip(formData) {
     VALUES (?, ?, ?, ?, ?, ?, 'DRAFT', 1)
   `;
   
-  await executeQuery(query, [tripNumber, vehicleId, driverId, source, destination, cargoWeight]);
+  await queryDb(query, [tripNumber, vehicleId, driverId, source, destination, cargoWeight]);
   revalidatePath('/trips');
   revalidatePath('/'); // update dashboard
 }
 
 export async function dispatchTrip(tripId, vehicleId, driverId, cargoWeight) {
   // Check vehicle capacity
-  const vRes = await executeQuery("SELECT capacity FROM vehicle WHERE id = ?", [vehicleId]);
+  const vRes = await queryDb("SELECT capacity FROM vehicle WHERE id = ?", [vehicleId]);
   const capacity = vRes?.data?.[0]?.capacity;
   if (capacity && cargoWeight > capacity) {
     throw new Error(`Cargo weight (${cargoWeight}) exceeds vehicle capacity (${capacity})`);
   }
 
   // Update trip, vehicle, driver
-  await executeQuery("UPDATE trip SET status = 'DISPATCHED', actual_start = CURRENT_TIMESTAMP WHERE id = ?", [tripId]);
-  await executeQuery("UPDATE vehicle SET status = 'ON_TRIP' WHERE id = ?", [vehicleId]);
-  await executeQuery("UPDATE driver SET status = 'ON_TRIP' WHERE id = ?", [driverId]);
+  await queryDb("UPDATE trip SET status = 'DISPATCHED', actual_start = CURRENT_TIMESTAMP WHERE id = ?", [tripId]);
+  await queryDb("UPDATE vehicle SET status = 'ON_TRIP' WHERE id = ?", [vehicleId]);
+  await queryDb("UPDATE driver SET status = 'ON_TRIP' WHERE id = ?", [driverId]);
 
   revalidatePath('/trips');
   revalidatePath('/');
 }
 
 export async function completeTrip(tripId, vehicleId, driverId) {
-  await executeQuery("UPDATE trip SET status = 'COMPLETED', actual_end = CURRENT_TIMESTAMP WHERE id = ?", [tripId]);
-  await executeQuery("UPDATE vehicle SET status = 'AVAILABLE' WHERE id = ?", [vehicleId]);
-  await executeQuery("UPDATE driver SET status = 'AVAILABLE' WHERE id = ?", [driverId]);
+  await queryDb("UPDATE trip SET status = 'COMPLETED', actual_end = CURRENT_TIMESTAMP WHERE id = ?", [tripId]);
+  await queryDb("UPDATE vehicle SET status = 'AVAILABLE' WHERE id = ?", [vehicleId]);
+  await queryDb("UPDATE driver SET status = 'AVAILABLE' WHERE id = ?", [driverId]);
 
   revalidatePath('/trips');
   revalidatePath('/');
 }
 
 export async function cancelTrip(tripId, vehicleId, driverId) {
-  await executeQuery("UPDATE trip SET status = 'CANCELLED' WHERE id = ?", [tripId]);
-  await executeQuery("UPDATE vehicle SET status = 'AVAILABLE' WHERE id = ?", [vehicleId]);
-  await executeQuery("UPDATE driver SET status = 'AVAILABLE' WHERE id = ?", [driverId]);
+  await queryDb("UPDATE trip SET status = 'CANCELLED' WHERE id = ?", [tripId]);
+  await queryDb("UPDATE vehicle SET status = 'AVAILABLE' WHERE id = ?", [vehicleId]);
+  await queryDb("UPDATE driver SET status = 'AVAILABLE' WHERE id = ?", [driverId]);
 
   revalidatePath('/trips');
   revalidatePath('/');

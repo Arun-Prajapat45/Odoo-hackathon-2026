@@ -1,6 +1,6 @@
 "use server";
 
-import { executeQuery } from '../../lib/db';
+import { queryDb } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
 export async function createFuelLog(formData) {
@@ -16,7 +16,7 @@ export async function createFuelLog(formData) {
     VALUES (?, ?, ?, ?, ?, ?)
   `;
   
-  await executeQuery(query, [vehicleId, liters, pricePerLiter, totalCost, odometer, date]);
+  await queryDb(query, [vehicleId, liters, pricePerLiter, totalCost, odometer, date]);
   revalidatePath('/fuel');
   revalidatePath('/'); // update dashboard
 }

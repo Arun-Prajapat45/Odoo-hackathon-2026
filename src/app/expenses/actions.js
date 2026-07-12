@@ -1,6 +1,6 @@
 "use server";
 
-import { executeQuery } from '../../lib/db';
+import { queryDb } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
 export async function createExpense(formData) {
@@ -15,7 +15,7 @@ export async function createExpense(formData) {
     VALUES (?, ?, ?, ?, ?)
   `;
   
-  await executeQuery(query, [vehicleId, type, amount, remarks, date]);
+  await queryDb(query, [vehicleId, type, amount, remarks, date]);
   revalidatePath('/expenses');
   revalidatePath('/'); // update dashboard
 }

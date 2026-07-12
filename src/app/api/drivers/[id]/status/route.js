@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { queryDb } from '@/lib/db';
 
 // GET  /api/drivers/[id]/status — get current status
 // POST /api/drivers/[id]/status — update status (with validation)
@@ -6,8 +6,7 @@ import { getDb } from '@/lib/db';
 export async function GET(request, { params }) {
   try {
     const { id } = await params;
-    const db = getDb();
-    const driver = db.prepare(`SELECT id, status, safety_score FROM driver WHERE id = ?`).get(id);
+    const driver = (await queryDb(`SELECT id, status, safety_score FROM driver WHERE id = ?`, [id]))?.[0];
     if (!driver) return Response.json({ success: false, error: 'Driver not found' }, { status: 404 });
     return Response.json({ success: true, data: driver });
   } catch (err) {
@@ -19,8 +18,6 @@ export async function POST(request, { params }) {
   try {
     const { id } = await params;
     const { status } = await request.json();
-    const db = getDb();
-
     const VALID_STATUSES = ['AVAILABLE', 'ON_TRIP', 'OFF_DUTY', 'SUSPENDED'];
     if (!VALID_STATUSES.includes(status)) {
       return Response.json(
@@ -29,7 +26,7 @@ export async function POST(request, { params }) {
       );
     }
 
-    const driver = db.prepare(`SELECT * FROM driver WHERE id = ?`).get(id);
+    const driver = (await queryDb(`SELECT * FROM driver WHERE id = ?`, [id]))?.[0];
     if (!driver) return Response.json({ success: false, error: 'Driver not found' }, { status: 404 });
 
     // Business rule: suspended drivers cannot be set to ON_TRIP
@@ -40,7 +37,7 @@ export async function POST(request, { params }) {
       );
     }
 
-    db.prepare(`UPDATE driver SET status = ? WHERE id = ?`).run(status, id);
+    await queryDb(`UPDATE driver SET status = ? WHERE id = ?`, [status, id]);
 
     return Response.json({ success: true, data: { id: driver.id, status } });
   } catch (err) {

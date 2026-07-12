@@ -1,10 +1,10 @@
-import { executeQuery } from '../../lib/db';
+import { queryDb } from '@/lib/db';
 import TripClient from './TripClient';
 import { createTrip, dispatchTrip, completeTrip, cancelTrip } from './actions';
 
 export default async function TripsPage() {
   // Fetch trips and related info
-  const tripsRes = await executeQuery(`
+  const tripsRes = await queryDb(`
     SELECT t.*, v.registration_number, u.name as driver_name 
     FROM trip t 
     LEFT JOIN vehicle v ON t.vehicle_id = v.id 
@@ -14,8 +14,8 @@ export default async function TripsPage() {
   `);
   
   // Fetch available vehicles and drivers for creating trips
-  const vehiclesRes = await executeQuery("SELECT id, registration_number, capacity FROM vehicle WHERE status = 'AVAILABLE'");
-  const driversRes = await executeQuery("SELECT d.id, u.name FROM driver d JOIN user u ON d.user_id = u.id WHERE d.status = 'AVAILABLE'");
+  const vehiclesRes = await queryDb("SELECT id, registration_number, capacity FROM vehicle WHERE status = 'AVAILABLE'");
+  const driversRes = await queryDb("SELECT d.id, u.name FROM driver d JOIN user u ON d.user_id = u.id WHERE d.status = 'AVAILABLE'");
 
   return (
     <div className="space-y-6">
@@ -24,9 +24,9 @@ export default async function TripsPage() {
       </div>
       
       <TripClient 
-        initialTrips={tripsRes?.data || []} 
-        availableVehicles={vehiclesRes?.data || []} 
-        availableDrivers={driversRes?.data || []}
+        initialTrips={tripsRes || []} 
+        availableVehicles={vehiclesRes || []} 
+        availableDrivers={driversRes || []}
         createAction={createTrip}
         dispatchAction={dispatchTrip}
         completeAction={completeTrip}

@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { queryDb } from '@/lib/db';
 
 // GET /api/maintenance/[id] — get single record
 // PUT /api/maintenance/[id] — update record (including closing → vehicle becomes AVAILABLE)
@@ -7,16 +7,14 @@ import { getDb } from '@/lib/db';
 export async function GET(request, { params }) {
   try {
     const { id } = await params;
-    const db = getDb();
-
-    const record = db.prepare(`
+    const record = (await queryDb(`
       SELECT m.*, v.registration_number, v.vehicle_name, v.status as vehicle_status,
              u.name as created_by_name
       FROM maintenance m
       JOIN vehicle v ON v.id = m.vehicle_id
       JOIN user u ON u.id = m.created_by
       WHERE m.id = ?
-    `).get(id);
+    `, [id]))?.[0];
 
     if (!record) {
       return Response.json({ success: false, error: 'Maintenance record not found' }, { status: 404 });
@@ -32,9 +30,7 @@ export async function PUT(request, { params }) {
   try {
     const { id } = await params;
     const body = await request.json();
-    const db = getDb();
-
-    const existing = db.prepare(`SELECT * FROM maintenance WHERE id = ?`).get(id);
+    const existing = (await queryDb(`SELECT * FROM maintenance WHERE id = ?`, [id]))?.[0];
     if (!existing) {
       return Response.json({ success: false, error: 'Maintenance record not found' }, { status: 404 });
     }
@@ -49,25 +45,25 @@ export async function PUT(request, { params }) {
       completed_date = existing.completed_date,
     } = body;
 
-    db.prepare(`
+    await queryDb(`
       UPDATE maintenance
       SET maintenance_type = ?, description = ?, priority = ?,
           cost = ?, status = ?, scheduled_date = ?, completed_date = ?
       WHERE id = ?
-    `).run(maintenance_type, description, priority, cost, status, scheduled_date, completed_date, id);
+    `, [maintenance_type, description, priority, cost, status, scheduled_date, completed_date, id]);
 
     // Business Rule: Closing maintenance → vehicle becomes AVAILABLE
     if (status === 'CLOSED' && existing.status === 'ACTIVE') {
-      db.prepare(`UPDATE vehicle SET status = 'AVAILABLE' WHERE id = ?`).run(existing.vehicle_id);
+      await queryDb(`UPDATE vehicle SET status = 'AVAILABLE' WHERE id = ?`, [existing.vehicle_id]);
 
       // Notify fleet managers that vehicle is back
-      notifyVehicleAvailable(db, existing.vehicle_id, maintenance_type);
+      await notifyVehicleAvailable(existing.vehicle_id, maintenance_type);
     }
 
-    const updated = db.prepare(`
+    const updated = (await queryDb(`
       SELECT m.*, v.registration_number, v.vehicle_name, v.status as vehicle_status
       FROM maintenance m JOIN vehicle v ON v.id = m.vehicle_id WHERE m.id = ?
-    `).get(id);
+    `, [id]))?.[0];
 
     return Response.json({ success: true, data: updated });
   } catch (err) {
@@ -79,18 +75,16 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     const { id } = await params;
-    const db = getDb();
-
-    const existing = db.prepare(`SELECT * FROM maintenance WHERE id = ?`).get(id);
+    const existing = (await queryDb(`SELECT * FROM maintenance WHERE id = ?`, [id]))?.[0];
     if (!existing) {
       return Response.json({ success: false, error: 'Maintenance record not found' }, { status: 404 });
     }
 
-    db.prepare(`DELETE FROM maintenance WHERE id = ?`).run(id);
+    await queryDb(`DELETE FROM maintenance WHERE id = ?`, [id]);
 
     // If we delete an active maintenance, release the vehicle back to AVAILABLE
     if (existing.status === 'ACTIVE') {
-      db.prepare(`UPDATE vehicle SET status = 'AVAILABLE' WHERE id = ?`).run(existing.vehicle_id);
+      await queryDb(`UPDATE vehicle SET status = 'AVAILABLE' WHERE id = ?`, [existing.vehicle_id]);
     }
 
     return Response.json({ success: true, message: 'Maintenance record deleted.' });
@@ -99,23 +93,21 @@ export async function DELETE(request, { params }) {
   }
 }
 
-function notifyVehicleAvailable(db, vehicleId, maintenanceType) {
+async function notifyVehicleAvailable(vehicleId, maintenanceType) {
   try {
-    const vehicle = db.prepare(`SELECT registration_number, vehicle_name FROM vehicle WHERE id = ?`).get(vehicleId);
-    const fleetManagers = db.prepare(`
+    const vehicle = (await queryDb(`SELECT registration_number, vehicle_name FROM vehicle WHERE id = ?`, [vehicleId]))?.[0];
+    const fleetManagers = await queryDb(`
       SELECT u.id FROM user u JOIN role r ON r.id = u.role_id WHERE r.name = 'Fleet Manager'
-    `).all();
-
-    const stmt = db.prepare(`
-      INSERT INTO notification (user_id, title, message, type) VALUES (?, ?, ?, 'INFO')
-    `);
+    `, []);
 
     for (const mgr of fleetManagers) {
-      stmt.run(
+      await queryDb(`
+        INSERT INTO notification (user_id, title, message, type) VALUES (?, ?, ?, 'INFO')
+      `, [
         mgr.id,
         'Vehicle Available',
         `Vehicle ${vehicle?.registration_number ?? vehicleId} is now AVAILABLE after completing maintenance: ${maintenanceType}.`
-      );
+      ]);
     }
   } catch (e) {
     console.error('[Notification] Vehicle available notify failed:', e);

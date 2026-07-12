@@ -1,11 +1,10 @@
-import { getDb } from '@/lib/db';
+import { queryDb } from '@/lib/db';
 
 // GET /api/maintenance — list all maintenance records (optional filters: ?vehicle_id=&status=)
 // POST /api/maintenance — create maintenance record → sets vehicle to IN_SHOP
 
 export async function GET(request) {
   try {
-    const db = getDb();
     const { searchParams } = new URL(request.url);
     const vehicleId = searchParams.get('vehicle_id');
     const status = searchParams.get('status');
@@ -31,7 +30,7 @@ export async function GET(request) {
     if (conditions.length) query += ' WHERE ' + conditions.join(' AND ');
     query += ' ORDER BY m.id DESC';
 
-    const records = db.prepare(query).all(...args);
+    const records = await queryDb(query, args);
     return Response.json({ success: true, data: records });
   } catch (err) {
     console.error('[GET /api/maintenance]', err);
@@ -59,9 +58,7 @@ export async function POST(request) {
       );
     }
 
-    const db = getDb();
-
-    const vehicle = db.prepare(`SELECT * FROM vehicle WHERE id = ?`).get(vehicle_id);
+    const vehicle = (await queryDb(`SELECT * FROM vehicle WHERE id = ?`, [vehicle_id]))?.[0];
     if (!vehicle) {
       return Response.json({ success: false, error: 'Vehicle not found' }, { status: 404 });
     }
@@ -74,20 +71,20 @@ export async function POST(request) {
     }
 
     // Business Rule: Creating maintenance → vehicle becomes IN_SHOP
-    db.prepare(`UPDATE vehicle SET status = 'IN_SHOP' WHERE id = ?`).run(vehicle_id);
+    await queryDb(`UPDATE vehicle SET status = 'IN_SHOP' WHERE id = ?`, [vehicle_id]);
 
-    const result = db.prepare(`
+    const result = await queryDb(`
       INSERT INTO maintenance (vehicle_id, maintenance_type, description, priority, cost, status, scheduled_date, created_by)
       VALUES (?, ?, ?, ?, ?, 'ACTIVE', ?, ?)
-    `).run(vehicle_id, maintenance_type, description ?? null, priority, cost, scheduled_date ?? null, created_by);
+    `, [vehicle_id, maintenance_type, description ?? null, priority, cost, scheduled_date ?? null, created_by]);
 
     // Notify all fleet managers
-    notifyFleetManagers(db, vehicle, maintenance_type, priority);
+    await notifyFleetManagers(vehicle, maintenance_type, priority);
 
-    const record = db.prepare(`
+    const record = (await queryDb(`
       SELECT m.*, v.registration_number, v.vehicle_name FROM maintenance m
-      JOIN vehicle v ON v.id = m.vehicle_id WHERE m.id = ?
-    `).get(result.lastInsertRowid);
+      JOIN vehicle v ON v.id = m.vehicle_id ORDER BY m.id DESC LIMIT 1
+    `))?.[0];
 
     return Response.json({ success: true, data: record }, { status: 201 });
   } catch (err) {
@@ -96,23 +93,21 @@ export async function POST(request) {
   }
 }
 
-function notifyFleetManagers(db, vehicle, maintenanceType, priority) {
+async function notifyFleetManagers(vehicle, maintenanceType, priority) {
   try {
-    const fleetManagers = db.prepare(`
+    const fleetManagers = await queryDb(`
       SELECT u.id FROM user u JOIN role r ON r.id = u.role_id WHERE r.name = 'Fleet Manager'
-    `).all();
-
-    const stmt = db.prepare(`
-      INSERT INTO notification (user_id, title, message, type) VALUES (?, ?, ?, ?)
-    `);
+    `, []);
 
     for (const mgr of fleetManagers) {
-      stmt.run(
+      await queryDb(`
+        INSERT INTO notification (user_id, title, message, type) VALUES (?, ?, ?, ?)
+      `, [
         mgr.id,
         'Maintenance Scheduled',
         `Vehicle ${vehicle.registration_number} (${vehicle.vehicle_name}) has been sent to shop for: ${maintenanceType}. Priority: ${priority}.`,
         priority === 'CRITICAL' ? 'CRITICAL' : 'WARNING'
-      );
+      ]);
     }
   } catch (e) {
     console.error('[Notification] Fleet manager notify failed:', e);

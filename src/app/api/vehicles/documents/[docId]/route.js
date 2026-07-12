@@ -1,4 +1,4 @@
-import { db } from '@/lib/db';
+import { queryDb } from '@/lib/db';
 import { NextResponse } from 'next/server';
 import { deleteFromCloudinary } from '@/lib/cloudinary';
 import { unlink } from 'fs/promises';

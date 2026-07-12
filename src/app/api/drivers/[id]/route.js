@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { queryDb } from '@/lib/db';
 
 // GET /api/drivers/[id] — get single driver with license history
 // PUT /api/drivers/[id] — update driver details / status
@@ -7,29 +7,27 @@ import { getDb } from '@/lib/db';
 export async function GET(request, { params }) {
   try {
     const { id } = await params;
-    const db = getDb();
-
-    const driver = db.prepare(`
+    const driver = (await queryDb(`
       SELECT d.*, u.name, u.email, u.status as user_status
       FROM driver d
       JOIN user u ON u.id = d.user_id
       WHERE d.id = ?
-    `).get(id);
+    `, [id]))?.[0];
 
     if (!driver) {
       return Response.json({ success: false, error: 'Driver not found' }, { status: 404 });
     }
 
     // Fetch license history
-    const licenses = db.prepare(`
+    const licenses = await queryDb(`
       SELECT * FROM driver_license WHERE driver_id = ? ORDER BY issue_date DESC
-    `).all(id);
+    `, [id]);
 
     // Fetch trip history (last 10)
-    const trips = db.prepare(`
+    const trips = await queryDb(`
       SELECT id, trip_number, source, destination, status, planned_start, actual_start, actual_end, revenue
       FROM trip WHERE driver_id = ? ORDER BY created_at DESC LIMIT 10
-    `).all(id);
+    `, [id]);
 
     return Response.json({ success: true, data: { ...driver, licenses, trips } });
   } catch (err) {
@@ -42,9 +40,7 @@ export async function PUT(request, { params }) {
   try {
     const { id } = await params;
     const body = await request.json();
-    const db = getDb();
-
-    const existing = db.prepare(`SELECT * FROM driver WHERE id = ?`).get(id);
+    const existing = (await queryDb(`SELECT * FROM driver WHERE id = ?`, [id]))?.[0];
     if (!existing) {
       return Response.json({ success: false, error: 'Driver not found' }, { status: 404 });
     }
@@ -66,24 +62,24 @@ export async function PUT(request, { params }) {
       safety_score = existing.safety_score,
     } = body;
 
-    db.prepare(`
+    await queryDb(`
       UPDATE driver
       SET license_number = ?, license_type = ?, license_expiry = ?,
           phone = ?, status = ?, safety_score = ?
       WHERE id = ?
-    `).run(license_number, license_type, license_expiry, phone, status, safety_score, id);
+    `, [license_number, license_type, license_expiry, phone, status, safety_score, id]);
 
     // Re-check license expiry if expiry date changed
     if (body.license_expiry) {
-      const updatedDriver = db.prepare(`
+      const updatedDriver = (await queryDb(`
         SELECT d.*, u.name FROM driver d JOIN user u ON u.id = d.user_id WHERE d.id = ?
-      `).get(id);
-      checkAndNotify(db, updatedDriver);
+      `, [id]))?.[0];
+      await checkAndNotify(updatedDriver);
     }
 
-    const updated = db.prepare(`
+    const updated = (await queryDb(`
       SELECT d.*, u.name, u.email FROM driver d JOIN user u ON u.id = d.user_id WHERE d.id = ?
-    `).get(id);
+    `, [id]))?.[0];
 
     return Response.json({ success: true, data: updated });
   } catch (err) {
@@ -95,9 +91,7 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     const { id } = await params;
-    const db = getDb();
-
-    const existing = db.prepare(`SELECT * FROM driver WHERE id = ?`).get(id);
+    const existing = (await queryDb(`SELECT * FROM driver WHERE id = ?`, [id]))?.[0];
     if (!existing) {
       return Response.json({ success: false, error: 'Driver not found' }, { status: 404 });
     }
@@ -110,7 +104,7 @@ export async function DELETE(request, { params }) {
     }
 
     // Cascades handled by FK: driver_license, trip (restricted), driver
-    db.prepare(`DELETE FROM driver WHERE id = ?`).run(id);
+    await queryDb(`DELETE FROM driver WHERE id = ?`, [id]);
 
     return Response.json({ success: true, message: 'Driver deleted.' });
   } catch (err) {
@@ -119,21 +113,21 @@ export async function DELETE(request, { params }) {
   }
 }
 
-function checkAndNotify(db, driver) {
+async function checkAndNotify(driver) {
   try {
     const expiry = new Date(driver.license_expiry);
     const today = new Date();
     const daysLeft = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
     if (daysLeft <= 30) {
-      db.prepare(`
+      await queryDb(`
         INSERT INTO notification (user_id, title, message, type)
         VALUES (?, ?, ?, ?)
-      `).run(
+      `, [
         driver.user_id,
         'License Expiry Warning',
         `Driver ${driver.name}'s license expires in ${daysLeft} day(s) on ${driver.license_expiry}.`,
         daysLeft <= 7 ? 'CRITICAL' : 'WARNING'
-      );
+      ]);
     }
   } catch (e) {
     console.error('[Notification] check failed:', e);

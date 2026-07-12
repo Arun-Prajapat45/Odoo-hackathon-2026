@@ -1,9 +1,12 @@
 import requests
 import sys
-import re
+import os
 
 def push_sql(filename):
-    url = "https://paced-nearest-prelaunch.ngrok-free.dev/query"
+    url = os.environ.get("ENDPOINT_URL")
+    if not url:
+        print("Error: ENDPOINT_URL environment variable is not set.")
+        sys.exit(1)
     
     print(f"Reading {filename}...")
     with open(filename, 'r', encoding='utf-8') as f:

@@ -413,4 +413,20 @@ tbody tr:hover { background: var(--bg-hover); }
   th, td {
     padding: 12px 16px;
   }
+
+  /* Maintenance Split Layout */
+  .split-layout {
+    display: flex !important;
+    flex-direction: column;
+    gap: 24px;
+  }
+}
+/* Desktop Maintenance Split Layout */
+@media (min-width: 769px) {
+  .split-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
 }

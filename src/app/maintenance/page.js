@@ -130,7 +130,7 @@ export default function MaintenancePage() {
   return (
     <AppShell title="Maintenance Management">
       {/* Main Layout: Split Form and Table */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '32px' }}>
+      <div className="split-layout">
         
         {/* Left Side: Form */}
         <div>

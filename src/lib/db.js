@@ -50,3 +50,7 @@ export async function queryDb(sql, args = []) {
   console.error('[queryDb Exception after retries]:', lastError?.message);
   throw lastError;
 }
+
+export const db = {
+  query: queryDb
+};

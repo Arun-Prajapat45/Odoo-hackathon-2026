@@ -1,4 +1,4 @@
-import { queryDb } from '@/lib/db';
+import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export async function PATCH(request, { params }) {
@@ -15,9 +15,10 @@ export async function PATCH(request, { params }) {
       }, { status: 400 });
     }
 
-    await queryDb('UPDATE vehicle SET status = ? WHERE id = ?', [status, vehicleId]);
+    await db.query("UPDATE vehicle SET status = ? WHERE id = ?", [status, vehicleId]);
 
-    return NextResponse.json({ success: true, status });
+    const updated = await db.query("SELECT * FROM vehicle WHERE id = ?", [vehicleId]);
+    return NextResponse.json(updated[0]);
   } catch (error) {
     console.error('PATCH /api/vehicles/[id]/status error:', error);
     return NextResponse.json({ error: 'Failed to update vehicle status' }, { status: 500 });

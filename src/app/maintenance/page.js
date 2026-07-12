@@ -129,192 +129,137 @@ export default function MaintenancePage() {
 
   return (
     <AppShell title="Maintenance Management">
-      {/* Stats */}
-      <div className="stats-grid">
-        {[
-          { label: 'Total Records',   value: stats.total,    icon: '📋', color: 'var(--accent)' },
-          { label: 'Active',          value: stats.active,   icon: '🔧', color: 'var(--yellow)' },
-          { label: 'Closed',          value: stats.closed,   icon: '✅', color: 'var(--green)' },
-          { label: 'Critical Active', value: stats.critical, icon: '🚨', color: 'var(--red)' },
-        ].map((s) => (
-          <div className="stat-card" key={s.label}>
-            <div className="stat-icon" style={{ background: `color-mix(in srgb, ${s.color} 15%, transparent)` }}>
-              {s.icon}
-            </div>
-            <div className="stat-info">
-              <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
-              <div className="stat-label">{s.label}</div>
-            </div>
+      {/* Main Layout: Split Form and Table */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '32px' }}>
+        
+        {/* Left Side: Form */}
+        <div>
+          <div style={{ fontSize: '1.2rem', fontWeight: 600, fontFamily: 'Space Grotesk', textTransform: 'uppercase', marginBottom: '16px' }}>
+            LOG SERVICE RECORD
           </div>
-        ))}
-      </div>
-
-      {/* Due soon alerts */}
-      {dueSoon.length > 0 && (
-        <div className="alert alert-warning">
-          🔧 <strong>{dueSoon.length} maintenance record{dueSoon.length > 1 ? 's' : ''} due within 3 days:</strong>{' '}
-          {dueSoon.map(r => `${r.registration_number} – ${r.maintenance_type}`).join(', ')}
-        </div>
-      )}
-
-      {/* Table Card */}
-      <div className="card">
-        <div className="toolbar">
-          <div className="search-bar">
-            <span className="search-icon">🔍</span>
-            <input
-              placeholder="Search by vehicle, type…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <select className="form-select" style={{ width: 'auto' }}
-            value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="">All Statuses</option>
-            <option value="ACTIVE">Active</option>
-            <option value="CLOSED">Closed</option>
-          </select>
-          <select className="form-select" style={{ width: 'auto' }}
-            value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
-            <option value="">All Priorities</option>
-            {PRIORITIES.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
-          <div className="toolbar-end">
-            <button className="btn btn-primary" onClick={() => { setShowModal(true); setError(''); }}>
-              + Schedule Maintenance
-            </button>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="loading-row"><div className="spinner" /></div>
-        ) : filtered.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">🔧</div>
-            <div className="empty-text">{search || statusFilter || priorityFilter ? 'No records match your filter' : 'No maintenance records yet'}</div>
-          </div>
-        ) : (
-          <div className="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Vehicle</th>
-                  <th>Type</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th>Scheduled</th>
-                  <th>Completed</th>
-                  <th>Cost</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((r) => (
-                  <tr key={r.id}>
-                    <td>
-                      <div className="td-primary">{r.registration_number}</div>
-                      <div className="text-muted">{r.vehicle_name}</div>
-                    </td>
-                    <td className="td-primary">{r.maintenance_type}</td>
-                    <td><span className={`badge ${priorityClass(r.priority)}`}>{r.priority}</span></td>
-                    <td><StatusBadge value={r.status} /></td>
-                    <td className="text-muted">{r.scheduled_date || '—'}</td>
-                    <td className="text-muted">{r.completed_date || '—'}</td>
-                    <td style={{ color: 'var(--text-primary)' }}>₹{Number(r.cost).toLocaleString()}</td>
-                    <td>
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <Link href={`/maintenance/${r.id}`} className="btn btn-ghost btn-sm">View</Link>
-                        {r.status === 'ACTIVE' && (
-                          <button className="btn btn-success btn-sm" onClick={() => closeRecord(r.id)}>Close</button>
-                        )}
-                        <button className="btn btn-danger btn-sm" onClick={() => deleteRecord(r.id)}>Del</button>
-                      </div>
-                    </td>
-                  </tr>
+          
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label" style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>VEHICLE</label>
+              <select className="form-select" required
+                value={form.vehicle_id}
+                onChange={(e) => setForm({ ...form, vehicle_id: e.target.value })}
+                style={{ borderRadius: '8px' }}>
+                <option value="">-- Select Vehicle --</option>
+                {vehicles.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.registration_number}
+                  </option>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+              </select>
+            </div>
 
-      {/* Create Maintenance Modal */}
-      {showModal && (
-        <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && setShowModal(false)}>
-          <div className="modal modal-lg">
-            <div className="modal-header">
-              <div className="modal-title">Schedule Maintenance</div>
-              <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
+            <div className="form-group">
+              <label className="form-label" style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>SERVICE TYPE</label>
+              <input className="form-input" required
+                placeholder="Oil Change"
+                value={form.maintenance_type}
+                onChange={(e) => setForm({ ...form, maintenance_type: e.target.value })}
+                style={{ borderRadius: '8px' }} />
             </div>
-            <div className="alert alert-info" style={{ margin: '0 0 16px' }}>
-              ℹ️ Creating this record will automatically set the vehicle status to <strong>IN_SHOP</strong>.
+
+            <div className="form-group">
+              <label className="form-label" style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>COST</label>
+              <input className="form-input" type="number" min="0" required
+                placeholder="2500"
+                value={form.cost}
+                onChange={(e) => setForm({ ...form, cost: e.target.value })}
+                style={{ borderRadius: '8px' }} />
             </div>
-            <form onSubmit={handleSubmit}>
-              <div className="form-grid">
-                <div className="form-group form-full">
-                  <label className="form-label">Vehicle *</label>
-                  <select className="form-select" required
-                    value={form.vehicle_id}
-                    onChange={(e) => setForm({ ...form, vehicle_id: e.target.value })}>
-                    <option value="">-- Select Vehicle --</option>
-                    {vehicles.map((v) => (
-                      <option key={v.id} value={v.id}>
-                        {v.registration_number} — {v.name} ({v.status})
-                      </option>
+
+            <div className="form-group">
+              <label className="form-label" style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>DATE</label>
+              <input className="form-input" type="date" required
+                value={form.scheduled_date}
+                onChange={(e) => setForm({ ...form, scheduled_date: e.target.value })}
+                style={{ borderRadius: '8px' }} />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>STATU</label>
+              <select className="form-select" value={form.priority}
+                onChange={(e) => setForm({ ...form, priority: e.target.value })}
+                style={{ borderRadius: '8px' }}>
+                <option value="ACTIVE">Active</option>
+                <option value="CLOSED">Closed</option>
+              </select>
+            </div>
+
+            {error && <div className="form-error mt-2">⚠ {error}</div>}
+
+            <button type="submit" className="btn btn-primary" disabled={submitting} 
+              style={{ width: '100%', padding: '12px', background: '#FFB800', color: '#000', borderRadius: '8px', fontSize: '1rem', marginTop: '8px' }}>
+              {submitting ? 'Saving...' : 'Save'}
+            </button>
+          </form>
+
+        </div>
+
+        {/* Right Side: Table */}
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+            <div style={{ fontSize: '1.2rem', fontWeight: 600, fontFamily: 'Space Grotesk', textTransform: 'uppercase' }}>
+              SERVICE LOG
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div className="search-bar" style={{ width: '200px' }}>
+                <span className="search-icon">🔍</span>
+                <input
+                  placeholder="Search..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  style={{ background: 'transparent', borderRadius: '4px', padding: '6px 12px 6px 32px' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="card" style={{ background: 'transparent', boxShadow: 'none', padding: 0, border: 'none' }}>
+            {loading ? (
+              <div className="loading-row"><div className="spinner" /></div>
+            ) : filtered.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">🔧</div>
+                <div className="empty-text">No maintenance records yet</div>
+              </div>
+            ) : (
+              <div className="table-wrapper">
+                <table style={{ background: 'transparent' }}>
+                  <thead>
+                    <tr>
+                      <th>VEHICLE</th>
+                      <th>SERVICE</th>
+                      <th>COST</th>
+                      <th>STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((r) => (
+                      <tr key={r.id}>
+                        <td>{r.registration_number}</td>
+                        <td>{r.maintenance_type}</td>
+                        <td>{Number(r.cost).toLocaleString()}</td>
+                        <td>
+                          {r.status === 'ACTIVE' ? (
+                            <StatusBadge value="IN-SHOP" />
+                          ) : (
+                            <StatusBadge value="COMPLETED" />
+                          )}
+                        </td>
+                      </tr>
                     ))}
-                  </select>
-                </div>
-                <div className="form-group form-full">
-                  <label className="form-label">Maintenance Type *</label>
-                  <input className="form-input" required
-                    placeholder="e.g. Oil Change, Engine Repair, Tyre Replace"
-                    value={form.maintenance_type}
-                    onChange={(e) => setForm({ ...form, maintenance_type: e.target.value })} />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Priority *</label>
-                  <select className="form-select" value={form.priority}
-                    onChange={(e) => setForm({ ...form, priority: e.target.value })}>
-                    {PRIORITIES.map((p) => <option key={p}>{p}</option>)}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Estimated Cost (₹)</label>
-                  <input className="form-input" type="number" min="0"
-                    value={form.cost}
-                    onChange={(e) => setForm({ ...form, cost: e.target.value })} />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Scheduled Date</label>
-                  <input className="form-input" type="date"
-                    value={form.scheduled_date}
-                    onChange={(e) => setForm({ ...form, scheduled_date: e.target.value })} />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Created By (User ID)</label>
-                  <input className="form-input" type="number" min="1"
-                    value={form.created_by}
-                    onChange={(e) => setForm({ ...form, created_by: e.target.value })} />
-                </div>
-                <div className="form-group form-full">
-                  <label className="form-label">Description</label>
-                  <textarea className="form-textarea"
-                    placeholder="Describe the maintenance work needed…"
-                    value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })} />
-                </div>
+                  </tbody>
+                </table>
               </div>
-              {error && <div className="form-error mt-2">⚠ {error}</div>}
-              <div className="modal-footer">
-                <button type="button" className="btn btn-ghost" onClick={() => setShowModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={submitting}>
-                  {submitting ? 'Scheduling…' : 'Schedule Maintenance'}
-                </button>
-              </div>
-            </form>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </AppShell>
   );
 }

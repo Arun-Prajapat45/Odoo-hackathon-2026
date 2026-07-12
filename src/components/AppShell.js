@@ -1,10 +1,39 @@
 'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import NotificationBell from './NotificationBell';
 
 export default function AppShell({ children, title }) {
   const pathname = usePathname();
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    // Check initial preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const storedTheme = localStorage.getItem('theme');
+    const initDark = storedTheme === 'dark' || (!storedTheme && prefersDark);
+    setIsDark(initDark);
+    if (initDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    setIsDark(prev => {
+      const next = !prev;
+      if (next) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+      return next;
+    });
+  };
 
   const NAV = [
     { href: '/drivers', icon: '🧑‍✈️', label: 'Drivers' },
@@ -37,6 +66,9 @@ export default function AppShell({ children, title }) {
         <header className="topbar">
           <div className="topbar-title">{title}</div>
           <div className="topbar-actions">
+            <button className="btn btn-ghost btn-sm" onClick={toggleTheme}>
+              {isDark ? '☀️' : '🌙'}
+            </button>
             <NotificationBell />
           </div>
         </header>

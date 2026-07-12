@@ -1,23 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 :root {
-  /* Strict Dark Backgrounds matching the image */
-  --bg-base:        #080C14; 
-  --bg-surface:     #0D1520; 
-  --bg-card:        #141D2B;
-  --bg-hover:       #192536; 
-  --bg-input:       #0A111A; 
+  /* Light Theme Backgrounds */
+  --bg-base:        #F8FAFC; 
+  --bg-surface:     #FFFFFF; 
+  --bg-card:        #FFFFFF;
+  --bg-hover:       #F1F5F9; 
+  --bg-input:       #FFFFFF; 
 
   /* Brand Accent — Orange */
-  --accent:         #FF6A1A;
-  --accent-light:   #FF8A4A; 
-  --accent-glow:    rgba(255, 106, 26, 0.15);
+  --accent:         #FFB800; /* Matching the yellow/orange in mockup */
+  --accent-light:   #FFD166; 
+  --accent-glow:    rgba(255, 184, 0, 0.15);
 
   /* Status Colors */
-  --go-green:       #10B981; 
-  --transit-blue:   #3B82F6; 
-  --caution-amber:  #F59E0B; 
+  --go-green:       #10B981; /* Available / Completed */
+  --transit-blue:   #3B82F6; /* On Trip */
+  --caution-amber:  #F59E0B; /* Suspended / In Shop (mockup shows an orange for In Shop) */
   --stop-red:       #EF4444; 
+  --off-duty:       #94A3B8; /* Off Duty */
+  
+  /* Mockup specific colors */
+  --green-solid:    #22c55e;
+  --orange-solid:   #f97316;
+  --blue-solid:     #3b82f6;
+  --gray-solid:     #6b7280;
 
   /* Compatibility variables for inline styles */
   --green:          var(--go-green);
@@ -29,22 +36,45 @@
   --green-bg:       rgba(16, 185, 129, 0.1);
   --yellow-bg:      rgba(245, 158, 11, 0.1);
   --red-bg:         rgba(239, 68, 68, 0.1);
-  --orange-bg:      var(--accent-glow);
-  --gray-bg:        rgba(100, 116, 139, 0.1);
+  --orange-bg:      rgba(255, 184, 0, 0.15);
+  --gray-bg:        #F1F5F9;
+
+  /* Typography */
+  --text-primary:   #0F172A; 
+  --text-secondary: #475569; 
+  --text-muted:     #64748B; 
+  --text-inverse:   #FFFFFF;
+
+  /* Borders */
+  --border:         #E2E8F0;
+  --border-accent:  rgba(255, 184, 0, 0.4);
+
+  /* Shadows */
+  --shadow-sm:   0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --transition-fast: all 0.2s ease;
+}
+
+.dark {
+  /* Strict Dark Backgrounds */
+  --bg-base:        #080C14; 
+  --bg-surface:     #0D1520; 
+  --bg-card:        #141D2B;
+  --bg-hover:       #192536; 
+  --bg-input:       #0A111A; 
 
   /* Typography */
   --text-primary:   #F8FAFC; 
   --text-secondary: #94A3B8; 
   --text-muted:     #475569; 
+  --text-inverse:   #080C14;
 
   /* Borders */
   --border:         #1E293B;
-  --border-accent:  rgba(255, 106, 26, 0.4);
 
-  /* Solid Shadows (no soft glows) */
+  /* Shadows */
   --shadow-sm:   0 1px 2px 0 rgba(0, 0, 0, 0.5);
   --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.5);
-  --transition-fast: all 0.2s ease;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -192,7 +222,7 @@ tbody tr:hover { background: var(--bg-hover); }
    ========================================================= */
 .badge {
   display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px;
-  font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; font-weight: 600; border: 1px solid transparent; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; background: transparent !important;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; font-weight: 600; border: 1px solid transparent; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; background: transparent;
 }
 .badge-available, .badge-active, .badge-completed, .badge-valid, .badge-duty, .badge-info { color: var(--go-green); border-color: var(--go-green); }
 .badge-suspended, .badge-cancelled, .badge-critical, .badge-high, .badge-suspend, .badge-expired { color: var(--stop-red); border-color: var(--stop-red); }

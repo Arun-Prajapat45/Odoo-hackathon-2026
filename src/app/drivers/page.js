@@ -126,29 +126,20 @@ export default function DriversPage() {
       )}
 
       {/* Table card */}
-      <div className="card">
-        <div className="toolbar">
+      <div className="card" style={{ background: 'var(--bg-surface)', boxShadow: 'none' }}>
+        <div className="toolbar" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '16px', marginBottom: '16px' }}>
           <div className="search-bar">
             <span className="search-icon">🔍</span>
             <input
-              placeholder="Search by name, code, license…"
+              placeholder="Search..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              style={{ background: 'transparent', borderRadius: '4px' }}
             />
           </div>
-          <select
-            className="form-select"
-            style={{ width: 'auto' }}
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">All Statuses</option>
-            {['AVAILABLE', 'ON_TRIP', 'OFF_DUTY', 'SUSPENDED'].map((s) => (
-              <option key={s} value={s}>{s.replace('_', ' ')}</option>
-            ))}
-          </select>
-          <div className="toolbar-end">
-            <button className="btn btn-primary" onClick={() => { setShowModal(true); setError(''); }}>
+          
+          <div className="toolbar-end" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button className="btn btn-primary" onClick={() => { setShowModal(true); setError(''); }} style={{ background: '#FFB800', color: '#000' }}>
               + Add Driver
             </button>
           </div>
@@ -163,15 +154,16 @@ export default function DriversPage() {
           </div>
         ) : (
           <div className="table-wrapper">
-            <table>
+            <table style={{ background: 'transparent' }}>
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>DRIVER</th>
-                  <th>LICENSE #</th>
+                  <th>LICENSE NO.</th>
+                  <th>CATEGOR</th>
                   <th>EXPIRY</th>
-                  <th>SAFETY SCORE</th>
-                  <th>REGION</th>
+                  <th>CONTACT</th>
+                  <th>TRIP COMPL.</th>
+                  <th>SAFETY</th>
                   <th>STATUS</th>
                 </tr>
               </thead>
@@ -183,38 +175,21 @@ export default function DriversPage() {
                   
                   return (
                     <tr key={d.id}>
-                      <td className="text-orange">
-                        D-{(d.id || '').toString().padStart(3, '0')}
-                      </td>
                       <td>
                         <div className="td-primary">{d.name}</div>
                       </td>
                       <td className="text-mono">{d.license_number}</td>
+                      <td>{d.license_type || 'LMV'}</td>
                       <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                          <span className="text-mono">{d.license_expiry}</span>
-                          <span className={`badge ${isExpired ? 'badge-expired' : isExpiringSoon ? 'badge-warning' : 'badge-valid'}`}>
-                            {isExpired ? '⊗ EXPIRED' : isExpiringSoon ? '⚠ EXPIRING' : '✓ VALID'}
-                          </span>
-                        </div>
+                        <span className="text-mono">
+                          {d.license_expiry} {isExpired ? 'EXPIRED' : ''}
+                        </span>
                       </td>
+                      <td>{d.phone || '98765xxxxx'}</td>
                       <td>
-                        <div className="safety-bar-wrap">
-                          <div className="safety-bar">
-                            <div
-                              className="safety-bar-fill"
-                              style={{
-                                width: `${d.safety_score}%`,
-                                background: d.safety_score >= 90 ? 'var(--go-green)' : d.safety_score >= 70 ? 'var(--caution-amber)' : 'var(--stop-red)'
-                              }}
-                            />
-                          </div>
-                          <span className="safety-score" style={{ color: d.safety_score >= 90 ? 'var(--go-green)' : d.safety_score >= 70 ? 'var(--caution-amber)' : 'var(--stop-red)' }}>
-                            {d.safety_score}
-                          </span>
-                        </div>
+                        {d.safety_score}%
                       </td>
-                      <td>Nairobi</td>
+                      <td><StatusBadge value={d.status} /></td>
                       <td><StatusBadge value={d.status} /></td>
                     </tr>
                   );

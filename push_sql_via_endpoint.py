@@ -53,3 +53,4 @@ if __name__ == "__main__":
         print("Usage: python push_sql_via_endpoint.py <file.sql>")
         sys.exit(1)
     push_sql(sys.argv[1])
+    

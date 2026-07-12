@@ -1,16 +1,16 @@
 import { NextResponse } from 'next/server';
-import { queryDb } from '@/lib/db';
+import { queryDb, safeQuery } from '@/lib/db';
 
 export async function GET(request) {
   try {
-    // Collect all data
-    const vehicles = (await queryDb('SELECT id, status, purchase_cost FROM vehicle')) || [];
-    const fuelLogs = (await queryDb('SELECT liters, total_cost FROM fuel_log')) || [];
-    const maintenances = (await queryDb('SELECT cost FROM maintenance')) || [];
-    const expenses = (await queryDb('SELECT amount FROM expense')) || [];
-    const trips = (await queryDb("SELECT actual_distance, revenue FROM trip WHERE status = 'COMPLETED'")) || [];
+    const [vehicles, fuelLogs, maintenances, expenses, trips] = await Promise.all([
+      safeQuery('SELECT id, status, purchase_cost FROM vehicle', [], []),
+      safeQuery('SELECT liters, total_cost FROM fuel_log', [], []),
+      safeQuery('SELECT cost FROM maintenance', [], []),
+      safeQuery('SELECT amount FROM expense', [], []),
+      safeQuery("SELECT actual_distance, revenue FROM trip WHERE status = 'COMPLETED'", [], []),
+    ]);
 
-    // Computations
     const totalVehicles = vehicles.length;
     const activeVehicles = vehicles.filter(v => ['AVAILABLE', 'ON_TRIP'].includes(v.status)).length;
     const utilization = totalVehicles > 0 ? ((activeVehicles / totalVehicles) * 100).toFixed(1) : 0;
@@ -29,28 +29,27 @@ export async function GET(request) {
     const profit = totalRevenue - operationalCost;
     const vehicleROI = totalAcquisitionCost > 0 ? ((profit / totalAcquisitionCost) * 100).toFixed(2) : 0;
 
-    // Build CSV Content
-    let csv = 'Metric,Value\n';
+    let csv = 'Metric,Value (INR / Units)\n';
     csv += `Total Fleet Size,${totalVehicles}\n`;
-    csv += `Active Vehicles,${activeVehicles}\n`;
-    csv += `Fleet Utilization (%),${utilization}\n`;
-    csv += `Total Distance (km),${totalDistance}\n`;
-    csv += `Total Fuel (Liters),${totalFuelLiters}\n`;
-    csv += `Fuel Efficiency (km/L),${fuelEfficiency}\n`;
-    csv += `Total Revenue ($),${totalRevenue}\n`;
-    csv += `Total Fuel Cost ($),${totalFuelCost}\n`;
-    csv += `Total Maintenance Cost ($),${totalMaintenanceCost}\n`;
-    csv += `Total Other Expenses ($),${totalOtherExpenses}\n`;
-    csv += `Total Operational Cost ($),${operationalCost}\n`;
-    csv += `Total Profit / Loss ($),${profit}\n`;
-    csv += `Total Fleet Acquisition Cost ($),${totalAcquisitionCost}\n`;
-    csv += `Overall Vehicle ROI (%),${vehicleROI}\n`;
+    csv += `Active & Operational Vehicles,${activeVehicles}\n`;
+    csv += `Fleet Utilization (%),${utilization}%\n`;
+    csv += `Total Distance Traversed (km),${totalDistance}\n`;
+    csv += `Total Fuel Consumed (Liters),${totalFuelLiters.toFixed(2)}\n`;
+    csv += `Weighted Fuel Efficiency (km/L),${fuelEfficiency}\n`;
+    csv += `Total Gross Revenue (INR),${totalRevenue.toFixed(2)}\n`;
+    csv += `Total Fuel Expenditure (INR),${totalFuelCost.toFixed(2)}\n`;
+    csv += `Total Maintenance Expenditure (INR),${totalMaintenanceCost.toFixed(2)}\n`;
+    csv += `Total Tolls & Other Expenses (INR),${totalOtherExpenses.toFixed(2)}\n`;
+    csv += `Total Cumulative Operational Cost (INR),${operationalCost.toFixed(2)}\n`;
+    csv += `Net Profit / Loss (INR),${profit.toFixed(2)}\n`;
+    csv += `Total Fleet Capital Acquisition Cost (INR),${totalAcquisitionCost.toFixed(2)}\n`;
+    csv += `Overall Capital Return ROI (%),${vehicleROI}%\n`;
 
     return new NextResponse(csv, {
       status: 200,
       headers: {
-        'Content-Type': 'text/csv',
-        'Content-Disposition': 'attachment; filename="transitops_reports.csv"'
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': 'attachment; filename="transitops_fleet_analytics_report.csv"'
       }
     });
   } catch (err) {

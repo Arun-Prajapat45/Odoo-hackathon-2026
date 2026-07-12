@@ -1,21 +1,22 @@
 'use client';
-import { useState, useEffect } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Plus, Eye, Trash2, X, Truck } from 'lucide-react';
+import { Search, Plus, Eye, Trash2, X, Truck, Filter, RefreshCw, AlertCircle, CheckCircle2, ChevronRight, FileText } from 'lucide-react';
 
 export default function VehiclesPage() {
   const [vehicles, setVehicles] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
-  
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [formError, setFormError] = useState('');
   const [deleteError, setDeleteError] = useState('');
-  
+
   const [formData, setFormData] = useState({
     registrationNumber: '', vehicleName: '', categoryId: '',
     manufacturer: '', model: '', year: '', capacity: '',
@@ -32,14 +33,22 @@ export default function VehiclesPage() {
 
     fetch(`/api/vehicles?${query.toString()}`)
       .then((res) => res.json())
-      .then((data) => { setVehicles(data); setLoading(false); })
+      .then((data) => {
+        if (Array.isArray(data)) setVehicles(data);
+        else if (data.data && Array.isArray(data.data)) setVehicles(data.data);
+        else setVehicles([]);
+        setLoading(false);
+      })
       .catch((err) => { console.error(err); setLoading(false); });
   };
 
   useEffect(() => {
     fetch('/api/categories')
       .then((res) => res.json())
-      .then((data) => setCategories(data))
+      .then((data) => {
+        if (Array.isArray(data)) setCategories(data);
+        else if (data.data && Array.isArray(data.data)) setCategories(data.data);
+      })
       .catch((err) => console.error(err));
   }, []);
 
@@ -66,7 +75,7 @@ export default function VehiclesPage() {
         body: JSON.stringify(formData)
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to add vehicle');
+      if (!response.ok || !data.success) throw new Error(data.error || 'Failed to add vehicle');
 
       fetchVehicles();
       setIsAddModalOpen(false);
@@ -82,11 +91,11 @@ export default function VehiclesPage() {
 
   const handleDeleteVehicle = async (id) => {
     setDeleteError('');
-    if (!confirm('Are you sure you want to delete this vehicle?')) return;
+    if (!confirm('Are you sure you want to delete this vehicle from the registry?')) return;
     try {
       const response = await fetch(`/api/vehicles/${id}`, { method: 'DELETE' });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to delete vehicle');
+      if (!response.ok || (data && data.success === false)) throw new Error(data.error || 'Failed to delete vehicle');
       fetchVehicles();
     } catch (err) {
       setDeleteError(err.message);
@@ -96,182 +105,417 @@ export default function VehiclesPage() {
 
   const getStatusBadge = (status) => {
     const styles = {
-      AVAILABLE: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
-      ON_TRIP: 'bg-blue-500/15 text-blue-400 border-blue-500/20',
-      IN_SHOP: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
-      RETIRED: 'bg-slate-500/15 text-slate-400 border-slate-500/20',
+      AVAILABLE: 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-500/30',
+      ON_TRIP: 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500/30',
+      IN_SHOP: 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-500/30',
+      RETIRED: 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-400 border-slate-300 dark:border-slate-700',
     };
     const labels = { AVAILABLE: 'Available', ON_TRIP: 'On Trip', IN_SHOP: 'In Shop', RETIRED: 'Retired' };
-    return <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${styles[status] || styles.RETIRED}`}>{labels[status] || status}</span>;
+    return (
+      <span className={`px-2.5 py-1 rounded-full text-xs font-bold border inline-flex items-center gap-1.5 ${styles[status] || styles.RETIRED}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${status === 'AVAILABLE' ? 'bg-emerald-500' : status === 'ON_TRIP' ? 'bg-blue-500 animate-pulse' : 'bg-amber-500'}`} />
+        <span>{labels[status] || status}</span>
+      </span>
+    );
   };
 
-  const inputClass = "w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all";
-  const labelClass = "block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider";
+  const inputClass = "w-full px-3.5 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all";
+  const labelClass = "block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider";
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="flex justify-between items-start md:items-center flex-col md:flex-row gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Vehicle Registry</h1>
-          <p className="text-slate-400 text-sm mt-1">Register and manage fleet vehicles, load limits, and document compliance.</p>
-        </div>
-        <button 
-          onClick={() => { setFormError(''); setIsAddModalOpen(true); }}
-          className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30"
-        >
-          <Plus size={16} /> Register Vehicle
-        </button>
-      </div>
-
-      {deleteError && (
-        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-sm flex items-center gap-2">
-          <span className="font-semibold">Deletion Blocked:</span> {deleteError}
-        </div>
-      )}
-
-      {/* Table Card */}
-      <div className="bg-slate-900 rounded-xl border border-slate-800/60 overflow-hidden">
-        {/* Filters */}
-        <div className="p-4 border-b border-slate-800/60 flex justify-between items-center flex-wrap gap-3">
-          <div className="flex gap-3 flex-wrap flex-1">
-            <div className="relative flex-1 min-w-[200px] max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-              <input
-                type="text"
-                placeholder="Search vehicles..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-              />
-            </div>
-            
-            <select 
-              value={typeFilter} 
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-300 min-w-[140px] focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-            >
-              <option value="">All Categories</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-
-            <select 
-              value={statusFilter} 
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-300 min-w-[140px] focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-            >
-              <option value="">All Statuses</option>
-              <option value="AVAILABLE">Available</option>
-              <option value="ON_TRIP">On Trip</option>
-              <option value="IN_SHOP">In Shop</option>
-              <option value="RETIRED">Retired</option>
-            </select>
+    <div className="space-y-6">
+      {/* Top Header Banner */}
+      <div className="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-900/10 via-indigo-900/10 to-slate-900/5">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25">
+            <Truck size={24} />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>Vehicle & Fleet Registry</span>
+              <span className="px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-xs font-bold uppercase tracking-wider">
+                {vehicles.length} Units Registered
+              </span>
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Register fleet units, track load limits, monitor fuel efficiency, and verify document compliance.
+            </p>
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-800/60">
-                <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Vehicle</th>
-                <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Registration</th>
-                <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</th>
-                <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Capacity</th>
-                <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Odometer</th>
-                <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan="7" className="px-6 py-12 text-center text-slate-500">
-                  <div className="flex items-center justify-center gap-3">
-                    <div className="w-5 h-5 border-2 border-slate-600 border-t-blue-500 rounded-full animate-spin" />
-                    Loading vehicles...
-                  </div>
-                </td></tr>
-              ) : vehicles.length === 0 ? (
-                <tr><td colSpan="7" className="px-6 py-12 text-center text-slate-500">
-                  <Truck size={32} className="mx-auto mb-2 text-slate-600" />
-                  No vehicles found matching the filters.
-                </td></tr>
-              ) : (
-                vehicles.map((vehicle) => (
-                  <tr key={vehicle.id} className="border-b border-slate-800/40 hover:bg-white/[0.02] transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="font-semibold text-white">{vehicle.vehicleName}</div>
-                      <div className="text-xs text-slate-500 mt-0.5">
-                        {vehicle.manufacturer || 'N/A'} {vehicle.model || ''} {vehicle.year ? `(${vehicle.year})` : ''}
+        <div className="flex items-center gap-2.5 self-end sm:self-auto">
+          <button
+            onClick={() => { setFormError(''); setIsAddModalOpen(true); }}
+            className="btn-primary text-xs py-2 px-3.5"
+          >
+            <Plus size={16} />
+            <span>Register Vehicle</span>
+          </button>
+          <button
+            onClick={fetchVehicles}
+            disabled={loading}
+            className="btn-secondary p-2"
+            title="Refresh registry"
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+          </button>
+        </div>
+      </div>
+
+      {deleteError && (
+        <div className="p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 rounded-xl text-xs font-semibold flex items-center gap-2">
+          <AlertCircle size={16} className="shrink-0" />
+          <span><strong className="font-bold">Deletion Blocked:</strong> {deleteError}</span>
+        </div>
+      )}
+
+      {/* Filter Tabs by Category */}
+      <div className="glass-card p-4 space-y-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+            <button
+              onClick={() => setTypeFilter('')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                typeFilter === ''
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              All Categories ({vehicles.length})
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setTypeFilter(cat.name)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  typeFilter === cat.name
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 overflow-x-auto">
+            {['', 'AVAILABLE', 'ON_TRIP', 'IN_SHOP', 'RETIRED'].map((st) => (
+              <button
+                key={st}
+                onClick={() => setStatusFilter(st)}
+                className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all uppercase ${
+                  statusFilter === st
+                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                    : 'bg-slate-50 dark:bg-slate-800/60 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                {st === '' ? 'All Status' : st.replace('_', ' ')}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Search Input */}
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+          <input
+            type="text"
+            placeholder="Search by registration number, vehicle name, manufacturer, or fuel type..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-all"
+          />
+        </div>
+      </div>
+
+      {/* Vehicles Table / Grid */}
+      {loading ? (
+        <div className="glass-card p-12 text-center text-slate-400 dark:text-slate-500">
+          <RefreshCw size={28} className="animate-spin mx-auto mb-3 text-blue-500" />
+          <p className="text-sm font-semibold">Loading vehicle registry...</p>
+        </div>
+      ) : vehicles.length === 0 ? (
+        <div className="glass-card p-16 text-center text-slate-400 dark:text-slate-500 max-w-md mx-auto">
+          <Truck size={40} className="mx-auto mb-3 text-slate-300 dark:text-slate-700" />
+          <h3 className="text-base font-bold text-slate-800 dark:text-white">No registered vehicles found</h3>
+          <p className="text-xs mt-1 text-slate-500">
+            {search || statusFilter || typeFilter
+              ? 'Try clearing or modifying your filters and search criteria.'
+              : 'Click "Register Vehicle" above to add your first fleet unit to TransitOps.'}
+          </p>
+        </div>
+      ) : (
+        <div className="glass-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-4 md:px-6">Vehicle Unit</th>
+                  <th className="py-3 px-4">Category & Model</th>
+                  <th className="py-3 px-4">Capacity / Odometer</th>
+                  <th className="py-3 px-4">Current Status</th>
+                  <th className="py-3 px-4">Fuel Type</th>
+                  <th className="py-3 px-4 md:px-6 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-sm">
+                {vehicles.map((v) => (
+                  <tr key={v.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors group">
+                    <td className="py-3.5 px-4 md:px-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 border border-blue-200/60 dark:border-blue-500/20">
+                          <Truck size={18} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900 dark:text-white leading-none flex items-center gap-2">
+                            <span>{v.registration_number || v.registrationNumber}</span>
+                          </p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+                            {v.vehicle_name || v.vehicleName}
+                          </p>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs text-slate-300">{vehicle.registrationNumber}</td>
-                    <td className="px-6 py-4 text-slate-300">{vehicle.category?.name || 'N/A'}</td>
-                    <td className="px-6 py-4 text-white font-medium">{vehicle.capacity?.toLocaleString()} kg</td>
-                    <td className="px-6 py-4 text-slate-400">{vehicle.odometer?.toLocaleString()} km</td>
-                    <td className="px-6 py-4">{getStatusBadge(vehicle.status)}</td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-1">
-                        <Link href={`/vehicles/${vehicle.id}`} className="p-2 rounded-lg text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 transition-colors" title="View">
-                          <Eye size={16} />
+
+                    <td className="py-3.5 px-4">
+                      <p className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
+                        {v.category_name || categories.find(c => c.id === (v.category_id || v.categoryId))?.name || 'Standard Unit'}
+                      </p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        {v.manufacturer || 'Generic'} • {v.model || 'Model'} ({v.year || 'N/A'})
+                      </p>
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                        {v.capacity ? `${v.capacity} Tons` : '—'}
+                      </p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        {v.odometer ? `${Number(v.odometer).toLocaleString()} km` : '0 km'}
+                      </p>
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      {getStatusBadge(v.status)}
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase">
+                        {v.fuel_type || v.fuelType || 'DIESEL'}
+                      </span>
+                    </td>
+
+                    <td className="py-3.5 px-4 md:px-6 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={`/vehicles/${v.id}`}
+                          className="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5 hover:border-blue-500/60"
+                        >
+                          <Eye size={14} className="text-blue-500" />
+                          <span className="hidden sm:inline">Details</span>
                         </Link>
-                        <button onClick={() => handleDeleteVehicle(vehicle.id)} className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors" title="Delete">
+                        <button
+                          onClick={() => handleDeleteVehicle(v.id)}
+                          className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                          title="Delete vehicle unit"
+                        >
                           <Trash2 size={16} />
                         </button>
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Modal */}
+      {/* Add Vehicle Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-2xl w-full max-w-4xl overflow-hidden max-h-[90vh] flex flex-col">
-            <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center">
-              <h3 className="font-semibold text-lg text-white">Register New Vehicle</h3>
-              <button onClick={() => setIsAddModalOpen(false)} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
-                <X size={18} />
-              </button>
-            </div>
-            
-            <div className="overflow-y-auto p-6 flex-1">
-              <form id="vehicleForm" onSubmit={handleAddVehicle}>
-                {formError && <div className="mb-4 p-3 bg-red-500/10 text-red-400 text-sm rounded-lg border border-red-500/20">⚠ {formError}</div>}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  <div><label className={labelClass}>Registration Number *</label><input type="text" name="registrationNumber" placeholder="e.g. MH-12-HE-1234" value={formData.registrationNumber} onChange={handleInputChange} className={inputClass} required /></div>
-                  <div><label className={labelClass}>Vehicle Name *</label><input type="text" name="vehicleName" placeholder="e.g. Eicher Pro" value={formData.vehicleName} onChange={handleInputChange} className={inputClass} required /></div>
-                  <div><label className={labelClass}>Category *</label><select name="categoryId" value={formData.categoryId} onChange={handleInputChange} className={inputClass} required><option value="">Select Category</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-                  <div><label className={labelClass}>Fuel Type *</label><select name="fuelType" value={formData.fuelType} onChange={handleInputChange} className={inputClass} required><option value="DIESEL">Diesel</option><option value="PETROL">Petrol</option><option value="CNG">CNG</option><option value="EV">Electric (EV)</option></select></div>
-                  <div><label className={labelClass}>Manufacturer</label><input type="text" name="manufacturer" placeholder="e.g. Eicher" value={formData.manufacturer} onChange={handleInputChange} className={inputClass} /></div>
-                  <div><label className={labelClass}>Model</label><input type="text" name="model" placeholder="e.g. Pro 2049" value={formData.model} onChange={handleInputChange} className={inputClass} /></div>
-                  <div><label className={labelClass}>Year</label><input type="number" name="year" placeholder="e.g. 2023" value={formData.year} onChange={handleInputChange} className={inputClass} min="1900" max={new Date().getFullYear() + 1} /></div>
-                  <div><label className={labelClass}>Max Load Capacity (kg) *</label><input type="number" name="capacity" placeholder="e.g. 3500" value={formData.capacity} onChange={handleInputChange} className={inputClass} required min="1" /></div>
-                  <div><label className={labelClass}>Initial Odometer (km)</label><input type="number" name="odometer" placeholder="e.g. 15000" value={formData.odometer} onChange={handleInputChange} className={inputClass} min="0" /></div>
-                  <div><label className={labelClass}>Purchase Cost (INR)</label><input type="number" name="purchaseCost" placeholder="e.g. 1200000" value={formData.purchaseCost} onChange={handleInputChange} className={inputClass} min="0" /></div>
-                  <div><label className={labelClass}>Initial Status</label><select name="status" value={formData.status} onChange={handleInputChange} className={inputClass}><option value="AVAILABLE">Available</option><option value="IN_SHOP">In Shop</option><option value="RETIRED">Retired</option></select></div>
-                  <div><label className={labelClass}>Current Location</label><input type="text" name="currentLocation" placeholder="e.g. Depot-A" value={formData.currentLocation} onChange={handleInputChange} className={inputClass} /></div>
-                  <div><label className={labelClass}>Insurance Expiry</label><input type="date" name="insuranceExpiry" value={formData.insuranceExpiry} onChange={handleInputChange} className={inputClass} /></div>
-                  <div><label className={labelClass}>Pollution Expiry</label><input type="date" name="pollutionExpiry" value={formData.pollutionExpiry} onChange={handleInputChange} className={inputClass} /></div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
+                  <Plus size={18} />
                 </div>
-              </form>
-            </div>
-            
-            <div className="px-6 py-4 border-t border-slate-800 flex justify-end gap-3">
-              <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-4 py-2.5 text-sm font-medium text-slate-400 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors">
-                Cancel
-              </button>
-              <button type="submit" form="vehicleForm" className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-all shadow-lg shadow-blue-500/20">
-                Save Vehicle
+                <div>
+                  <h3 className="font-bold text-base text-slate-900 dark:text-white">Register New Fleet Unit</h3>
+                  <p className="text-xs text-slate-500">Enter vehicle specifications and regulatory documents</p>
+                </div>
+              </div>
+              <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+                <X size={20} />
               </button>
             </div>
+
+            <form onSubmit={handleAddVehicle} className="p-6 overflow-y-auto space-y-5">
+              {formError && (
+                <div className="p-3.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl text-red-600 dark:text-red-400 text-xs font-semibold flex items-center gap-2">
+                  <AlertCircle size={16} className="shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>Registration Number *</label>
+                  <input
+                    type="text"
+                    name="registrationNumber"
+                    required
+                    value={formData.registrationNumber}
+                    onChange={handleInputChange}
+                    placeholder="e.g., KA-01-EQ-9921"
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Vehicle Alias / Name *</label>
+                  <input
+                    type="text"
+                    name="vehicleName"
+                    required
+                    value={formData.vehicleName}
+                    onChange={handleInputChange}
+                    placeholder="e.g., FreightLiner Express #4"
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Category *</label>
+                  <select
+                    name="categoryId"
+                    required
+                    value={formData.categoryId}
+                    onChange={handleInputChange}
+                    className={inputClass}
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Fuel Type *</label>
+                  <select
+                    name="fuelType"
+                    required
+                    value={formData.fuelType}
+                    onChange={handleInputChange}
+                    className={inputClass}
+                  >
+                    <option value="DIESEL">Diesel</option>
+                    <option value="PETROL">Petrol</option>
+                    <option value="ELECTRIC">Electric</option>
+                    <option value="CNG">CNG</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Payload Capacity (Tons) *</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    name="capacity"
+                    required
+                    value={formData.capacity}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 18.5"
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Initial Odometer (km)</label>
+                  <input
+                    type="number"
+                    name="odometer"
+                    value={formData.odometer}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 42000"
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Manufacturer</label>
+                  <input
+                    type="text"
+                    name="manufacturer"
+                    value={formData.manufacturer}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Tata or Volvo"
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Model & Year</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      name="model"
+                      value={formData.model}
+                      onChange={handleInputChange}
+                      placeholder="Model"
+                      className={`${inputClass} flex-1`}
+                    />
+                    <input
+                      type="number"
+                      name="year"
+                      value={formData.year}
+                      onChange={handleInputChange}
+                      placeholder="Year"
+                      className={`${inputClass} w-24`}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Insurance Expiry Date</label>
+                  <input
+                    type="date"
+                    name="insuranceExpiry"
+                    value={formData.insuranceExpiry}
+                    onChange={handleInputChange}
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Pollution Certificate Expiry</label>
+                  <input
+                    type="date"
+                    name="pollutionExpiry"
+                    value={formData.pollutionExpiry}
+                    onChange={handleInputChange}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="btn-secondary px-4 py-2 text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary px-5 py-2 text-xs"
+                >
+                  Register Unit
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

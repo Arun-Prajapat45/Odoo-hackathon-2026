@@ -1,33 +1,35 @@
-import { queryDb } from '@/lib/db';
-import { BarChart3, Download, TrendingUp, TrendingDown, DollarSign, Activity } from 'lucide-react';
+import React from 'react';
+import { queryDb, safeQuery } from '@/lib/db';
+import { BarChart3, Download, TrendingUp, TrendingDown, DollarSign, Activity, PieChart, ArrowUpRight, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ReportsPage() {
-  const vehiclesRes = await queryDb('SELECT id, status, purchase_cost FROM vehicle');
+  const [vehiclesRes, fuelRes, maintRes, expRes, tripRes] = await Promise.all([
+    safeQuery('SELECT id, status, purchase_cost FROM vehicle', [], []),
+    safeQuery('SELECT liters, total_cost, odometer FROM fuel_log', [], []),
+    safeQuery('SELECT cost FROM maintenance', [], []),
+    safeQuery('SELECT amount FROM expense', [], []),
+    safeQuery("SELECT actual_distance, revenue FROM trip WHERE status = 'COMPLETED'", [], []),
+  ]);
+
   const vehicles = vehiclesRes || [];
-  
   const totalVehicles = vehicles.length;
   const activeVehicles = vehicles.filter(v => ['AVAILABLE', 'ON_TRIP'].includes(v.status)).length;
   const utilization = totalVehicles > 0 ? ((activeVehicles / totalVehicles) * 100).toFixed(1) : 0;
-  
   const totalAcquisitionCost = vehicles.reduce((sum, v) => sum + (v.purchase_cost || 0), 0);
 
-  const fuelRes = await queryDb('SELECT liters, total_cost, odometer FROM fuel_log');
   const fuelLogs = fuelRes || [];
   const totalFuelLiters = fuelLogs.reduce((sum, f) => sum + (f.liters || 0), 0);
   const totalFuelCost = fuelLogs.reduce((sum, f) => sum + (f.total_cost || 0), 0);
 
-  const maintRes = await queryDb('SELECT cost FROM maintenance');
   const maintenances = maintRes || [];
   const totalMaintenanceCost = maintenances.reduce((sum, m) => sum + (m.cost || 0), 0);
 
-  const expRes = await queryDb('SELECT amount FROM expense');
   const expenses = expRes || [];
   const totalOtherExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
 
-  const tripRes = await queryDb("SELECT actual_distance, revenue FROM trip WHERE status = 'COMPLETED'");
   const trips = tripRes || [];
   const totalDistance = trips.reduce((sum, t) => sum + (t.actual_distance || 0), 0);
   const totalRevenue = trips.reduce((sum, t) => sum + (t.revenue || 0), 0);
@@ -37,88 +39,163 @@ export default async function ReportsPage() {
   const profit = totalRevenue - operationalCost;
   const vehicleROI = totalAcquisitionCost > 0 ? ((profit / totalAcquisitionCost) * 100).toFixed(2) : 0;
 
+  const statCards = [
+    {
+      title: 'Fleet Operational Utilization',
+      value: `${utilization}%`,
+      sub: `${activeVehicles} of ${totalVehicles} units active & available`,
+      icon: Activity,
+      color: 'from-blue-600 to-indigo-600 text-blue-600 dark:text-blue-400'
+    },
+    {
+      title: 'Total Operational Outlay',
+      value: `₹${operationalCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
+      sub: 'Cumulative fuel, maintenance & toll vouchers',
+      icon: DollarSign,
+      color: 'from-amber-500 to-orange-600 text-amber-600 dark:text-amber-400'
+    },
+    {
+      title: 'Fleet Fuel Efficiency',
+      value: `${fuelEfficiency} km/L`,
+      sub: `Across ${totalDistance.toLocaleString()} km traversed distance`,
+      icon: BarChart3,
+      color: 'from-purple-600 to-pink-600 text-purple-600 dark:text-purple-400'
+    },
+    {
+      title: 'Net Fleet Capital ROI',
+      value: `${vehicleROI}%`,
+      sub: `On ₹${totalAcquisitionCost.toLocaleString()} acquisition basis`,
+      icon: profit >= 0 ? TrendingUp : TrendingDown,
+      color: profit >= 0 ? 'from-emerald-600 to-teal-600 text-emerald-600 dark:text-emerald-400' : 'from-red-600 to-rose-600 text-red-600 dark:text-red-400'
+    }
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Reports & Analytics</h1>
-          <p className="text-sm text-slate-400 mt-1">Financial performance and fleet metrics</p>
+      {/* Header Card */}
+      <div className="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-indigo-900/10 via-purple-900/10 to-slate-900/5">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
+            <PieChart size={24} />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>Financial Intelligence & Fleet Analytics</span>
+              <span className="px-2.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider">
+                Live Audit
+              </span>
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Audit operational expenditures against trip revenues, calculate return on investment (ROI), and download financial statements.
+            </p>
+          </div>
         </div>
+
         <Link 
           href="/api/reports/export"
           target="_blank"
-          className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg shadow-blue-500/20"
+          className="btn-primary py-2.5 px-4 text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/20 self-end sm:self-center shrink-0 flex items-center gap-2"
         >
-          <Download size={16} /> Export CSV
+          <Download size={16} />
+          <span>Download Fleet CSV Report</span>
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-        <div className="bg-slate-900 p-6 rounded-xl border border-slate-800/60">
-          <div className="flex items-center gap-3 text-slate-500 mb-3">
-            <div className="p-2 rounded-lg bg-blue-500/10"><Activity size={16} className="text-blue-400" /></div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider">Fleet Utilization</h3>
-          </div>
-          <p className="text-3xl font-bold text-white">{utilization}%</p>
-          <p className="text-xs text-slate-500 mt-2">{activeVehicles} of {totalVehicles} vehicles active</p>
-        </div>
-
-        <div className="bg-slate-900 p-6 rounded-xl border border-slate-800/60">
-          <div className="flex items-center gap-3 text-slate-500 mb-3">
-            <div className="p-2 rounded-lg bg-amber-500/10"><DollarSign size={16} className="text-amber-400" /></div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider">Operational Cost</h3>
-          </div>
-          <p className="text-3xl font-bold text-white">${operationalCost.toLocaleString()}</p>
-          <p className="text-xs text-slate-500 mt-2">Fuel, Maintenance & Tolls</p>
-        </div>
-
-        <div className="bg-slate-900 p-6 rounded-xl border border-slate-800/60">
-          <div className="flex items-center gap-3 text-slate-500 mb-3">
-            <div className="p-2 rounded-lg bg-indigo-500/10"><BarChart3 size={16} className="text-indigo-400" /></div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider">Fuel Efficiency</h3>
-          </div>
-          <p className="text-3xl font-bold text-white">{fuelEfficiency} <span className="text-lg font-medium text-slate-500">km/L</span></p>
-          <p className="text-xs text-slate-500 mt-2">{totalDistance} km total distance</p>
-        </div>
-
-        <div className="bg-slate-900 p-6 rounded-xl border border-slate-800/60">
-          <div className="flex items-center gap-3 text-slate-500 mb-3">
-            <div className={`p-2 rounded-lg ${profit >= 0 ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>
-              {profit >= 0 ? <TrendingUp size={16} className="text-emerald-400" /> : <TrendingDown size={16} className="text-red-400" />}
+      {/* KPI Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((card, idx) => {
+          const Icon = card.icon;
+          return (
+            <div key={idx} className="glass-card p-5 flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{card.title}</span>
+                <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${card.color.split(' ')[0]} ${card.color.split(' ')[1]} flex items-center justify-center text-white shadow-md`}>
+                  <Icon size={16} />
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className={`text-3xl font-extrabold ${card.color.split(' ').slice(2).join(' ')}`}>{card.value}</p>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">{card.sub}</p>
+              </div>
             </div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider">Overall ROI</h3>
-          </div>
-          <p className={`text-3xl font-bold ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{vehicleROI}%</p>
-          <p className="text-xs text-slate-500 mt-2">On ${totalAcquisitionCost.toLocaleString()} acquisition</p>
-        </div>
+          );
+        })}
       </div>
 
-      <div className="bg-slate-900 rounded-xl border border-slate-800/60 overflow-hidden">
-        <div className="p-5 border-b border-slate-800/60">
-          <h2 className="text-sm font-semibold text-white uppercase tracking-wider">Summary Metrics</h2>
+      {/* Financial Breakdown Table */}
+      <div className="glass-card overflow-hidden">
+        <div className="p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
+          <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
+            <CheckCircle2 size={16} className="text-blue-500" />
+            <span>Comprehensive Financial Performance Ledger</span>
+          </h2>
+          <span className="text-xs font-mono font-bold text-slate-500">Currency: INR (₹)</span>
         </div>
-        <table className="w-full text-left text-sm">
-          <tbody>
-            <tr className="border-b border-slate-800/40">
-              <td className="px-6 py-4 font-medium text-slate-400">Total Revenue</td>
-              <td className="px-6 py-4 font-bold text-white">${totalRevenue.toLocaleString()}</td>
-            </tr>
-            <tr className="border-b border-slate-800/40">
-              <td className="px-6 py-4 font-medium text-slate-400">Total Operational Cost</td>
-              <td className="px-6 py-4 font-bold text-white">${operationalCost.toLocaleString()}</td>
-            </tr>
-            <tr className="border-b border-slate-800/40">
-              <td className="px-6 py-4 font-medium text-slate-400">Total Profit / Loss</td>
-              <td className={`px-6 py-4 font-bold ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                ${profit.toLocaleString()}
-              </td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 font-medium text-slate-400">Total Fleet Acquisition Cost</td>
-              <td className="px-6 py-4 font-bold text-white">${totalAcquisitionCost.toLocaleString()}</td>
-            </tr>
-          </tbody>
-        </table>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider bg-slate-50/20 dark:bg-slate-800/20">
+                <th className="py-3.5 px-6">Metric Description</th>
+                <th className="py-3.5 px-6 text-right">Computed Value</th>
+                <th className="py-3.5 px-6">Classification</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-sm font-semibold">
+              <tr className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                <td className="py-4 px-6 text-slate-700 dark:text-slate-300">Total Completed Trip Gross Revenue</td>
+                <td className="py-4 px-6 text-right font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
+                  + ₹{totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </td>
+                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[10px] uppercase font-bold">Revenue</span></td>
+              </tr>
+
+              <tr className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                <td className="py-4 px-6 text-slate-700 dark:text-slate-300">Total Fuel & Refueling Receipts Outlay</td>
+                <td className="py-4 px-6 text-right font-bold text-amber-600 dark:text-amber-400 font-mono">
+                  - ₹{totalFuelCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </td>
+                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-[10px] uppercase font-bold">Operational Expense</span></td>
+              </tr>
+
+              <tr className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                <td className="py-4 px-6 text-slate-700 dark:text-slate-300">Total Shop Maintenance & Parts Outlay</td>
+                <td className="py-4 px-6 text-right font-bold text-blue-600 dark:text-blue-400 font-mono">
+                  - ₹{totalMaintenanceCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </td>
+                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-[10px] uppercase font-bold">Operational Expense</span></td>
+              </tr>
+
+              <tr className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                <td className="py-4 px-6 text-slate-700 dark:text-slate-300">Total Tolls, Permits & Sundry Vouchers</td>
+                <td className="py-4 px-6 text-right font-bold text-purple-600 dark:text-purple-400 font-mono">
+                  - ₹{totalOtherExpenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </td>
+                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] uppercase font-bold">Operational Expense</span></td>
+              </tr>
+
+              <tr className="bg-slate-50 dark:bg-slate-800/40 font-extrabold border-t-2 border-slate-200 dark:border-slate-700">
+                <td className="py-4 px-6 text-slate-900 dark:text-white">Net Operating Profit / Loss Balance</td>
+                <td className={`py-4 px-6 text-right font-mono text-base ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                  {profit >= 0 ? '+' : ''} ₹{profit.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </td>
+                <td className="py-4 px-6">
+                  <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${profit >= 0 ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}>
+                    {profit >= 0 ? 'Net Surplus' : 'Net Deficit'}
+                  </span>
+                </td>
+              </tr>
+
+              <tr className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                <td className="py-4 px-6 text-slate-700 dark:text-slate-300">Total Fleet Capital Acquisition Basis</td>
+                <td className="py-4 px-6 text-right font-bold text-slate-900 dark:text-white font-mono">
+                  ₹{totalAcquisitionCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </td>
+                <td className="py-4 px-6"><span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] uppercase font-bold">Capital Asset</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

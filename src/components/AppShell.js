@@ -2,20 +2,17 @@
 
 import React from 'react';
 
-/**
- * AppShell - Page wrapper component used by driver and maintenance details pages.
- */
 export default function AppShell({ title, children }) {
   return (
-    <div className="app-shell-container" style={{ width: '100%' }}>
+    <div className="w-full space-y-6">
       {title && (
-        <div className="app-shell-header" style={{ marginBottom: '1.5rem' }}>
-          <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+        <div className="pb-2 border-b border-slate-200 dark:border-slate-800">
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             {title}
           </h1>
         </div>
       )}
-      <div className="app-shell-content">
+      <div className="w-full">
         {children}
       </div>
     </div>

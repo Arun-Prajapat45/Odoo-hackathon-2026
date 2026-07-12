@@ -1,91 +1,76 @@
-import { getDb } from '@/lib/db';
+import { NextResponse } from 'next/server';
+import { queryDb } from '@/lib/db.js';
+import { verifyToken } from '@/lib/auth.js';
 
-// GET /api/notifications?user_id=&unread=true — list notifications
-// POST /api/notifications/[id]/read — mark as read
-
+/**
+ * GET /api/notifications
+ * Retrieves notifications for the logged in user
+ */
 export async function GET(request) {
   try {
-    const db = getDb();
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('user_id');
-    const unreadOnly = searchParams.get('unread') === 'true';
+    const token = request.cookies.get('transitops_token')?.value || request.headers.get('authorization')?.split(' ')[1];
+    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    let query = `SELECT * FROM notification`;
-    const conditions = [];
-    const args = [];
+    const user = await verifyToken(token);
+    if (!user || !user.userId) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
 
-    if (userId) {
-      conditions.push('user_id = ?');
-      args.push(userId);
-    }
-    if (unreadOnly) {
-      conditions.push('read = 0');
-    }
+    const notifications = await queryDb(
+      'SELECT * FROM notification WHERE user_id = ? ORDER BY id DESC LIMIT 50',
+      [user.userId]
+    );
 
-    if (conditions.length) query += ' WHERE ' + conditions.join(' AND ');
-    query += ' ORDER BY created_at DESC LIMIT 50';
-
-    const notifications = db.prepare(query).all(...args);
-    return Response.json({ success: true, data: notifications });
+    return NextResponse.json({ success: true, notifications }, { status: 200 });
   } catch (err) {
-    return Response.json({ success: false, error: err.message }, { status: 500 });
+    console.error('[GET /api/notifications Error]:', err);
+    return NextResponse.json({ error: 'Failed to retrieve notifications.' }, { status: 500 });
   }
 }
 
-// POST /api/notifications — trigger license & maintenance due check manually
-export async function POST() {
+/**
+ * POST /api/notifications
+ * Creates a new notification for a user
+ */
+export async function POST(request) {
   try {
-    const db = getDb();
-    let created = 0;
+    const token = request.cookies.get('transitops_token')?.value || request.headers.get('authorization')?.split(' ')[1];
+    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Check all drivers for license expiry in ≤ 30 days
-    const drivers = db.prepare(`
-      SELECT d.id, d.user_id, d.license_number, d.license_expiry, u.name
-      FROM driver d JOIN user u ON u.id = d.user_id
-      WHERE d.status != 'SUSPENDED'
-    `).all();
+    const user = await verifyToken(token);
+    if (!user || !user.userId) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
 
-    const notifyStmt = db.prepare(`
-      INSERT INTO notification (user_id, title, message, type) VALUES (?, ?, ?, ?)
-    `);
-
-    for (const driver of drivers) {
-      const daysLeft = Math.ceil((new Date(driver.license_expiry) - new Date()) / (1000 * 60 * 60 * 24));
-      if (daysLeft <= 30) {
-        notifyStmt.run(
-          driver.user_id,
-          'License Expiry Warning',
-          `License ${driver.license_number} for ${driver.name} expires in ${daysLeft} day(s) on ${driver.license_expiry}.`,
-          daysLeft <= 7 ? 'CRITICAL' : 'WARNING'
-        );
-        created++;
-      }
+    const { title, message, type, target_user_id } = await request.json();
+    if (!title || !message) {
+      return NextResponse.json({ error: 'Title and message are required.' }, { status: 400 });
     }
 
-    // Check maintenance due soon (scheduled_date within 3 days)
-    const maintenances = db.prepare(`
-      SELECT m.id, m.maintenance_type, m.scheduled_date, m.priority,
-             v.registration_number, v.vehicle_name,
-             u.id as mgr_id
-      FROM maintenance m
-      JOIN vehicle v ON v.id = m.vehicle_id
-      JOIN user u ON u.role_id = (SELECT id FROM role WHERE name = 'Fleet Manager')
-      WHERE m.status = 'ACTIVE' AND m.scheduled_date IS NOT NULL
-        AND date(m.scheduled_date) <= date('now', '+3 days')
-    `).all();
+    const notifType = ['INFO', 'WARNING', 'CRITICAL'].includes(type) ? type : 'INFO';
 
-    for (const m of maintenances) {
-      notifyStmt.run(
-        m.mgr_id,
-        'Maintenance Due Soon',
-        `Maintenance "${m.maintenance_type}" for ${m.registration_number} is scheduled on ${m.scheduled_date}. Priority: ${m.priority}.`,
-        m.priority === 'CRITICAL' ? 'CRITICAL' : 'WARNING'
+    if (target_user_id) {
+      // Send to a specific user
+      await queryDb(
+        'INSERT INTO notification (user_id, title, message, type, `read`, created_at) VALUES (?, ?, ?, ?, 0, CURRENT_TIMESTAMP)',
+        [target_user_id, title, message, notifType]
       );
-      created++;
+      return NextResponse.json({ success: true, message: 'Notification sent.' }, { status: 201 });
     }
 
-    return Response.json({ success: true, message: `${created} notifications created.` });
+    // Broadcast to ALL users
+    const allUsers = await queryDb('SELECT id FROM user');
+    if (!allUsers || allUsers.length === 0) {
+      return NextResponse.json({ error: 'No users found to broadcast to.' }, { status: 400 });
+    }
+
+    for (const u of allUsers) {
+      const isRead = u.id === user.userId ? 1 : 0;
+      await queryDb(
+        'INSERT INTO notification (user_id, title, message, type, `read`, created_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)',
+        [u.id, title, message, notifType, isRead]
+      );
+    }
+
+    return NextResponse.json({ success: true, message: `Broadcast sent to ${allUsers.length} users.` }, { status: 201 });
   } catch (err) {
-    return Response.json({ success: false, error: err.message }, { status: 500 });
+    console.error('[POST /api/notifications Error]:', err);
+    return NextResponse.json({ error: 'Failed to create notification.' }, { status: 500 });
   }
 }
